@@ -12,6 +12,10 @@ const MAPPING: Record<string, ComponentProps<typeof MaterialIcons>['name']> = {
   'chevron.right': 'chevron-right',
   'line.3.horizontal': 'menu',
   'arrow.up.right': 'arrow-upward',
+  'arrow.left': 'arrow-back',
+  grid: 'apps',
+  globe: 'language',
+  paintpalette: 'palette',
 };
 
 type IconSymbolName = keyof typeof MAPPING;
