@@ -39,7 +39,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
     isIntersecting,
   });
 
-  const handleWordSelect = (word: string, wordRef: React.RefObject<View>) => {
+  const handleWordSelect = (word: string, wordRef: React.RefObject<View | null>) => {
     cardRef.current?.measure((fx, fy, width, height, px, py) => {
       wordRef.current?.measure((wfx, wfy, wWidth, wHeight, wpx, wpy) => {
         setPopoverState({

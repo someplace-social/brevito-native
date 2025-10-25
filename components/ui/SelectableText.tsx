@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, TextStyle, View } from 'react-native';
 
 type SelectableTextProps = {
   text: string;
-  onWordSelect: (word: string, ref: React.RefObject<View>) => void;
+  onWordSelect: (word: string, ref: React.RefObject<View | null>) => void;
   style: TextStyle;
 };
 
