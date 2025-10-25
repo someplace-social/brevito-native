@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
+import * as Haptics from 'expo-haptics';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type MainViewProps = {
@@ -7,23 +8,28 @@ type MainViewProps = {
 };
 
 export function MainView({ setActiveView }: MainViewProps) {
+  const handlePress = (view: "topics" | "language" | "appearance") => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setActiveView(view);
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={() => setActiveView("topics")}>
+      <TouchableOpacity style={styles.button} onPress={() => handlePress("topics")}>
         <View style={styles.buttonContent}>
           <IconSymbol name="grid" size={24} color={Colors.dark.mutedForeground} />
           <Text style={styles.buttonText}>Topics</Text>
         </View>
         <IconSymbol name="chevron.right" size={20} color={Colors.dark.mutedForeground} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => setActiveView("language")}>
+      <TouchableOpacity style={styles.button} onPress={() => handlePress("language")}>
         <View style={styles.buttonContent}>
           <IconSymbol name="globe" size={24} color={Colors.dark.mutedForeground} />
           <Text style={styles.buttonText}>Language</Text>
         </View>
         <IconSymbol name="chevron.right" size={20} color={Colors.dark.mutedForeground} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => setActiveView("appearance")}>
+      <TouchableOpacity style={styles.button} onPress={() => handlePress("appearance")}>
         <View style={styles.buttonContent}>
           <IconSymbol name="paintpalette" size={24} color={Colors.dark.mutedForeground} />
           <Text style={styles.buttonText}>Appearance</Text>

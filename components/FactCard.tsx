@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import { useFactContent } from '@/hooks/useFactContent';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -59,6 +60,7 @@ export function FactCard({
   });
 
   const handleWordSelect = (word: string, wordRef: React.RefObject<View | null>) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     cardRef.current?.measure((fx, fy, width, height, px, py) => {
       wordRef.current?.measure((wfx, wfy, wWidth, wHeight, wpx, wpy) => {
         setPopoverState({
@@ -78,8 +80,19 @@ export function FactCard({
   };
 
   const handleLearnMore = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     handleClosePopover();
     setIsDrawerOpen(true);
+  };
+
+  const handleCategoryPress = (cat: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onCategoryFilter(cat);
+  };
+
+  const handleReadMorePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onReadMore(factId);
   };
 
   return (
@@ -102,13 +115,13 @@ export function FactCard({
         <View style={styles.contentContainer}>
           {category && (
             <View style={styles.categoryContainer}>
-              <TouchableOpacity onPress={() => onCategoryFilter(category)}>
+              <TouchableOpacity onPress={() => handleCategoryPress(category)}>
                 <Text style={styles.categoryText}>{category}</Text>
               </TouchableOpacity>
               {subcategory && (
                 <>
                   <Text style={styles.categoryText}> &gt; </Text>
-                  <TouchableOpacity onPress={() => onCategoryFilter(category)}>
+                  <TouchableOpacity onPress={() => handleCategoryPress(category)}>
                     <Text style={styles.categoryText}>{subcategory}</Text>
                   </TouchableOpacity>
                 </>
@@ -125,7 +138,7 @@ export function FactCard({
             />
           )}
         </View>
-        <TouchableOpacity onPress={() => onReadMore(factId)} style={styles.footerContainer}>
+        <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
           <View style={styles.readMoreButton}>
             <Text style={styles.readMoreText}>Read More</Text>
             <IconSymbol name="arrow.up.right" size={12} color={Colors.dark.mutedForeground} />
