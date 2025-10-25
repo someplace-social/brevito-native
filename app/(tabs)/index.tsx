@@ -1,6 +1,31 @@
+import { FactCard } from '@/components/FactCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
 import { FlatList, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const MOCK_FACTS = [
+  {
+    id: '1',
+    category: 'Science',
+    subcategory: 'Physics',
+    imageUrl: 'https://cdn.pixabay.com/photo/2021/03/11/02/57/mountain-6086083_640.jpg',
+    content: 'The speed of light in a vacuum is exactly 299,792,458 meters per second.',
+  },
+  {
+    id: '2',
+    category: 'History',
+    subcategory: null,
+    imageUrl: 'https://cdn.pixabay.com/photo/2017/08/06/12/02/people-2591874_640.jpg',
+    content: 'The Great Wall of China is not a single continuous wall but a system of fortifications.',
+  },
+  {
+    id: '3',
+    category: 'Animals',
+    subcategory: 'Marine Life',
+    imageUrl: 'https://cdn.pixabay.com/photo/2016/11/29/04/19/ocean-1867285_640.jpg',
+    content: 'An octopus has three hearts; two pump blood through the gills, and the third pumps it to the rest of the body.',
+  },
+];
 
 export default function HomeScreen() {
   return (
@@ -16,9 +41,17 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         <FlatList
-          data={[]}
-          renderItem={({ item }) => <Text>{item}</Text>}
-          keyExtractor={(item) => item}
+          data={MOCK_FACTS}
+          renderItem={({ item }) => (
+            <FactCard
+              category={item.category}
+              subcategory={item.subcategory}
+              imageUrl={item.imageUrl}
+              content={item.content}
+              showImages={true}
+            />
+          )}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
         />
       </View>
