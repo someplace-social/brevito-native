@@ -13,7 +13,7 @@ const cleanWord = (word: string) => {
 };
 
 export function SelectableText({ text, onWordSelect, style }: SelectableTextProps) {
-  const wordRefs = useRef<Array<React.RefObject<View>>>([]);
+  const wordRefs = useRef<Array<React.RefObject<View | null>>>([]);
 
   const words = text.split(/(\s+)/); // Split by space, keeping spaces
 
@@ -40,7 +40,7 @@ export function SelectableText({ text, onWordSelect, style }: SelectableTextProp
                 onWordSelect(cleaned, wordRefs.current[index]);
               }
             }}>
-            <View ref={wordRefs.current[index]}>
+            <View ref={wordRefs.current[index] as React.RefObject<View>}>
               <Text style={style}>{word}</Text>
             </View>
           </Pressable>

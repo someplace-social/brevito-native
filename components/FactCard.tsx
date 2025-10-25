@@ -1,11 +1,11 @@
-import { Colors } from '@/constants/Colors';
-import { useFactContent } from '@/hooks/useFactContent';
 import { Image } from 'expo-image';
-import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { TranslationPopover } from './TranslationPopover';
+import { Colors } from '@/constants/Colors';
 import { IconSymbol } from './ui/icon-symbol';
+import { useFactContent } from '@/hooks/useFactContent';
 import { SelectableText } from './ui/SelectableText';
+import { useState, useRef } from 'react';
+import { TranslationPopover } from './TranslationPopover';
 
 type FactCardProps = {
   factId: string;
