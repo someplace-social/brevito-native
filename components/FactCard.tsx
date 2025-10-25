@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View 
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
 import { SelectableText } from './ui/SelectableText';
+import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type FactCardProps = {
   factId: string;
@@ -32,6 +33,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
     position: null,
     selectedWord: '',
   });
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const { content, error, isLoading } = useFactContent({
     factId,
@@ -47,7 +49,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
           isVisible: true,
           selectedWord: word,
           position: {
-            top: wpy - py - wHeight - 10, // Position above the word
+            top: wpy - py - wHeight - 10,
             left: wpx - px,
           },
         });
@@ -57,6 +59,11 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
 
   const handleClosePopover = () => {
     setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+  };
+
+  const handleLearnMore = () => {
+    handleClosePopover();
+    setIsDrawerOpen(true);
   };
 
   return (
@@ -70,7 +77,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
             contentLanguage={contentLanguage}
             translationLanguage={'English'} // Hardcoded for now
             context={content}
-            onLearnMore={() => console.log('Learn More')}
+            onLearnMore={handleLearnMore}
           />
         )}
         {showImages && imageUrl && (
@@ -100,6 +107,13 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
           </View>
         </TouchableOpacity>
       </Pressable>
+      <WordAnalysisDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        selectedText={popoverState.selectedWord}
+        sourceLanguage={contentLanguage}
+        targetLanguage={'English'} // Hardcoded for now
+      />
     </View>
   );
 }
