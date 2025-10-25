@@ -37,7 +37,7 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>Learn while you doomscroll</Text>
           </View>
           <TouchableOpacity style={styles.menuButton}>
-            <IconSymbol name="menu" size={32} color={Colors.dark.foreground} />
+            <IconSymbol name="line.3.horizontal" size={32} color={Colors.dark.foreground} />
           </TouchableOpacity>
         </View>
         <FlatList

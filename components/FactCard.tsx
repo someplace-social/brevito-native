@@ -38,7 +38,7 @@ export function FactCard({ category, subcategory, imageUrl, showImages, content 
       <View style={styles.footerContainer}>
         <TouchableOpacity style={styles.readMoreButton}>
           <Text style={styles.readMoreText}>Read More</Text>
-          <IconSymbol name="arrow-up-right" size={12} color={Colors.dark.mutedForeground} />
+          <IconSymbol name="arrow.up.right" size={12} color={Colors.dark.mutedForeground} />
         </TouchableOpacity>
       </View>
     </View>
