@@ -2,14 +2,14 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AppearanceView } from '../components/options/AppearanceView';
 import { LanguageView } from '../components/options/LanguageView';
 import { MainView } from '../components/options/MainView';
 import { TopicsView } from '../components/options/TopicsView';
 
-type View = "main" | "topics" | "language" | "appearance";
+type SettingsView = "main" | "topics" | "language" | "appearance";
 
 const categoriesAreEqual = (a: string[], b: string[]) => {
   if (a.length !== b.length) return false;
@@ -20,7 +20,7 @@ const categoriesAreEqual = (a: string[], b: string[]) => {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const [activeView, setActiveView] = useState<View>("main");
+  const [activeView, setActiveView] = useState<SettingsView>("main");
   const {
     contentLanguage, setContentLanguage,
     translationLanguage, setTranslationLanguage,
@@ -37,7 +37,7 @@ export default function SettingsScreen() {
   const [stagedFontSize, setStagedFontSize] = useState(fontSize);
   const [stagedShowImages, setStagedShowImages] = useState(showImages);
 
-  useEffect(() => {
+  const handleSaveChanges = () => {
     const hasChanges =
       stagedContentLanguage !== contentLanguage ||
       stagedTranslationLanguage !== translationLanguage ||
@@ -46,35 +46,30 @@ export default function SettingsScreen() {
       stagedFontSize !== fontSize ||
       stagedShowImages !== showImages;
 
-    const beforeRemove = (e: any) => {
-      if (!hasChanges) return;
-      e.preventDefault();
-      
+    if (hasChanges) {
       setContentLanguage(stagedContentLanguage);
       setTranslationLanguage(stagedTranslationLanguage);
       setLevel(stagedLevel);
       setSelectedCategories(stagedCategories);
       setFontSize(stagedFontSize);
       setShowImages(stagedShowImages);
-    };
-
-    router.events.on('beforeRemove', beforeRemove);
-    return () => router.events.off('beforeRemove', beforeRemove);
-  }, [router.events, stagedContentLanguage, stagedTranslationLanguage, stagedLevel, stagedCategories, stagedFontSize, stagedShowImages, contentLanguage, translationLanguage, level, selectedCategories, fontSize, showImages, setContentLanguage, setTranslationLanguage, setLevel, setSelectedCategories, setFontSize, setShowImages]);
-
-  const viewTitles: Record<View, string> = {
-    main: "Settings",
-    topics: "Topics",
-    language: "Language",
-    appearance: "Appearance",
+    }
   };
 
   const handleBack = () => {
     if (activeView === 'main') {
+      handleSaveChanges();
       router.back();
     } else {
       setActiveView('main');
     }
+  };
+
+  const viewTitles: Record<SettingsView, string> = {
+    main: "Settings",
+    topics: "Topics",
+    language: "Language",
+    appearance: "Appearance",
   };
 
   return (

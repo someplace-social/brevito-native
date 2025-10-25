@@ -62,7 +62,7 @@ export default function HomeScreen() {
             <Text style={styles.title}>Brevito</Text>
             <Text style={styles.subtitle}>Learn while you doomscroll</Text>
           </View>
-          <TouchableOpacity style={styles.menuButton} onPress={() => router.push('/settings')}>
+          <TouchableOpacity style={styles.menuButton} onPress={() => router.push('/settings' as any)}>
             <IconSymbol name="line.3.horizontal" size={32} color={Colors.dark.foreground} />
           </TouchableOpacity>
         </View>
