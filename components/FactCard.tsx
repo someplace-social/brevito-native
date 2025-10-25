@@ -1,8 +1,11 @@
 import { Colors } from '@/constants/Colors';
 import { useFactContent } from '@/hooks/useFactContent';
 import { Image } from 'expo-image';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
+import { SelectableText } from './ui/SelectableText';
 
 type FactCardProps = {
   factId: string;
@@ -15,7 +18,20 @@ type FactCardProps = {
   level: string;
 };
 
+type PopoverState = {
+  isVisible: boolean;
+  position: { top: number; left: number } | null;
+  selectedWord: string;
+};
+
 export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting, contentLanguage, level }: FactCardProps) {
+  const cardRef = useRef<View>(null);
+  const [popoverState, setPopoverState] = useState<PopoverState>({
+    isVisible: false,
+    position: null,
+    selectedWord: '',
+  });
+
   const { content, error, isLoading } = useFactContent({
     factId,
     language: contentLanguage,
@@ -23,37 +39,66 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
     isIntersecting,
   });
 
+  const handleWordSelect = (word: string, wordRef: React.RefObject<View>) => {
+    cardRef.current?.measure((fx, fy, width, height, px, py) => {
+      wordRef.current?.measure((wfx, wfy, wWidth, wHeight, wpx, wpy) => {
+        setPopoverState({
+          isVisible: true,
+          selectedWord: word,
+          position: {
+            top: wpy - py - wHeight - 10, // Position above the word
+            left: wpx - px,
+          },
+        });
+      });
+    });
+  };
+
+  const handleClosePopover = () => {
+    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+  };
+
   return (
-    <View style={styles.card}>
-      {showImages && imageUrl && (
-        <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
-      )}
-      <View style={styles.contentContainer}>
-        {category && (
-          <View style={styles.categoryContainer}>
-            <TouchableOpacity>
-              <Text style={styles.categoryText}>{category}</Text>
-            </TouchableOpacity>
-            {subcategory && (
-              <>
-                <Text style={styles.categoryText}> &gt; </Text>
-                <TouchableOpacity>
-                  <Text style={styles.categoryText}>{subcategory}</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
+    <View ref={cardRef}>
+      <Pressable onPress={handleClosePopover} style={styles.card}>
+        {popoverState.isVisible && (
+          <TranslationPopover
+            isVisible={popoverState.isVisible}
+            position={popoverState.position}
+            selectedWord={popoverState.selectedWord}
+            contentLanguage={contentLanguage}
+            translationLanguage={'English'} // Hardcoded for now
+            context={content}
+            onLearnMore={() => console.log('Learn More')}
+          />
         )}
-        {isLoading && <ActivityIndicator color={Colors.dark.primary} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        {content && <Text style={styles.contentText}>{content}</Text>}
-      </View>
-      <View style={styles.footerContainer}>
-        <TouchableOpacity style={styles.readMoreButton}>
-          <Text style={styles.readMoreText}>Read More</Text>
-          <IconSymbol name="arrow.up.right" size={12} color={Colors.dark.mutedForeground} />
-        </TouchableOpacity>
-      </View>
+        {showImages && imageUrl && (
+          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
+        )}
+        <View style={styles.contentContainer}>
+          {category && (
+            <View style={styles.categoryContainer}>
+              <Text style={styles.categoryText}>{category}</Text>
+              {subcategory && <Text style={styles.categoryText}> &gt; {subcategory}</Text>}
+            </View>
+          )}
+          {isLoading && <ActivityIndicator color={Colors.dark.primary} />}
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          {content && (
+            <SelectableText
+              text={content}
+              onWordSelect={handleWordSelect}
+              style={styles.contentText}
+            />
+          )}
+        </View>
+        <View style={styles.footerContainer}>
+          <View style={styles.readMoreButton}>
+            <Text style={styles.readMoreText}>Read More</Text>
+            <IconSymbol name="arrow.up.right" size={12} color={Colors.dark.mutedForeground} />
+          </View>
+        </View>
+      </Pressable>
     </View>
   );
 }
