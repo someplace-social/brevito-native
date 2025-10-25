@@ -17,6 +17,8 @@ const MAPPING: Record<string, ComponentProps<typeof MaterialIcons>['name']> = {
   globe: 'language',
   paintpalette: 'palette',
   xmark: 'close',
+  'chevron.down': 'arrow-drop-down',
+  checkmark: 'check',
 };
 
 type IconSymbolName = keyof typeof MAPPING;

@@ -1,6 +1,19 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { Colors } from '@/constants/Colors';
-// We will create a custom Picker component later. For now, we'll use placeholders.
+import { StyleSheet, View } from 'react-native';
+import { CustomPicker } from '../ui/CustomPicker';
+
+const languageItems = [
+  { label: 'English', value: 'English' },
+  { label: 'Spanish', value: 'Spanish' },
+  { label: 'French', value: 'French' },
+  { label: 'German', value: 'German' },
+  { label: 'Italian', value: 'Italian' },
+];
+
+const levelItems = [
+  { label: 'Beginner', value: 'Beginner' },
+  { label: 'Intermediate', value: 'Intermediate' },
+  { label: 'Advanced', value: 'Advanced' },
+];
 
 type LanguageViewProps = {
   stagedContentLanguage: string;
@@ -21,18 +34,24 @@ export function LanguageView({
 }: LanguageViewProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.row}>
-        <Text style={styles.label}>Content</Text>
-        <Text style={styles.value}>{stagedContentLanguage}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Translate To</Text>
-        <Text style={styles.value}>{stagedTranslationLanguage}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Level</Text>
-        <Text style={styles.value}>{stagedLevel}</Text>
-      </View>
+      <CustomPicker
+        label="Content"
+        selectedValue={stagedContentLanguage}
+        onValueChange={setStagedContentLanguage}
+        items={languageItems}
+      />
+      <CustomPicker
+        label="Translate To"
+        selectedValue={stagedTranslationLanguage}
+        onValueChange={setStagedTranslationLanguage}
+        items={languageItems}
+      />
+      <CustomPicker
+        label="Level"
+        selectedValue={stagedLevel}
+        onValueChange={setStagedLevel}
+        items={levelItems}
+      />
     </View>
   );
 }
@@ -40,20 +59,5 @@ export function LanguageView({
 const styles = StyleSheet.create({
   container: {
     gap: 24,
-  },
-  row: {
-    gap: 8,
-  },
-  label: {
-    color: Colors.dark.foreground,
-    fontSize: 16,
-  },
-  value: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    borderRadius: 6,
   },
 });
