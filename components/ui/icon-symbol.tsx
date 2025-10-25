@@ -1,10 +1,11 @@
 // Fallback for using MaterialIcons on Android and web.
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
 // The keys of this object are valid SF Symbol names.
-const MAPPING = {
+const MAPPING: Record<string, ComponentProps<typeof MaterialIcons>['name']> = {
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
