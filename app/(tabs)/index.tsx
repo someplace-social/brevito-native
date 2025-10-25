@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    paddingTop: 24,
+    paddingTop: 40,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
     backgroundColor: Colors.dark.background,
