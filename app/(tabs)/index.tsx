@@ -2,6 +2,7 @@ import { FactCard } from '@/components/FactCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
 import { useFactFeed } from '@/hooks/useFactFeed';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,22 +12,42 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ViewToken,
 } from 'react-native';
 
 export default function HomeScreen() {
   const { facts, isLoading, hasMore, loadMore, error } = useFactFeed();
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
+
+  const onViewableItemsChanged = useCallback(({ viewableItems: items }: { viewableItems: ViewToken[] }) => {
+    setViewableItems(items.map((item) => item.key as string));
+  }, []);
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50, // Item is considered visible when 50% of it is visible
+  };
+
+  const viewabilityConfigCallbackPairs = useRef([{ viewabilityConfig, onViewableItemsChanged }]);
 
   const renderFooter = () => {
     if (!hasMore && facts.length > 0) {
-      return (
-        <Text style={styles.footerText}>You've reached the end!</Text>
-      );
+      return <Text style={styles.footerText}>You've reached the end!</Text>;
     }
-    if (isLoading) {
+    if (isLoading && facts.length > 0) {
       return <ActivityIndicator size="large" color={Colors.dark.primary} style={styles.spinner} />;
     }
     return null;
   };
+
+  if (isLoading && facts.length === 0) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centeredMessage}>
+          <ActivityIndicator size="large" color={Colors.dark.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -54,6 +75,7 @@ export default function HomeScreen() {
                 subcategory={item.subcategory}
                 imageUrl={item.image_url}
                 showImages={true}
+                isIntersecting={viewableItems.includes(item.id)}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -61,6 +83,7 @@ export default function HomeScreen() {
             onEndReached={loadMore}
             onEndReachedThreshold={0.5}
             ListFooterComponent={renderFooter}
+            viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
           />
         )}
       </View>

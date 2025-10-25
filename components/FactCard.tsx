@@ -1,6 +1,7 @@
 import { Colors } from '@/constants/Colors';
+import { useFactContent } from '@/hooks/useFactContent';
 import { Image } from 'expo-image';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
 
 type FactCardProps = {
@@ -9,11 +10,16 @@ type FactCardProps = {
   subcategory: string | null;
   imageUrl: string | null;
   showImages: boolean;
+  isIntersecting: boolean;
 };
 
-export function FactCard({ factId, category, subcategory, imageUrl, showImages }: FactCardProps) {
-  // Placeholder for content fetching logic
-  const content = 'Loading content...';
+export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting }: FactCardProps) {
+  const { content, error, isLoading } = useFactContent({
+    factId,
+    language: 'Spanish', // Hardcoded for now
+    level: 'Beginner', // Hardcoded for now
+    isIntersecting,
+  });
 
   return (
     <View style={styles.card}>
@@ -36,7 +42,9 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages }
             )}
           </View>
         )}
-        <Text style={styles.contentText}>{content}</Text>
+        {isLoading && <ActivityIndicator color={Colors.dark.primary} />}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+        {content && <Text style={styles.contentText}>{content}</Text>}
       </View>
       <View style={styles.footerContainer}>
         <TouchableOpacity style={styles.readMoreButton}>
@@ -55,6 +63,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.dark.border,
     overflow: 'hidden',
+    minHeight: 100,
   },
   image: {
     width: '100%',
@@ -79,6 +88,10 @@ const styles = StyleSheet.create({
     color: Colors.dark.foreground,
     fontSize: 18,
     lineHeight: 26,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
   footerContainer: {
     paddingHorizontal: 16,
