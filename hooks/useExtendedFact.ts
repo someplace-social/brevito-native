@@ -40,7 +40,7 @@ export function useExtendedFact({ factId, language, level }: UseExtendedFactProp
           .eq('language', language)
           .single();
 
-        if (translationError) throw translationError;
+        if (translationError && translationError.code !== 'PGRST116') throw translationError;
 
         const { data: ogFactData, error: ogFactError } = await supabase
           .from('og_facts')
@@ -51,7 +51,7 @@ export function useExtendedFact({ factId, language, level }: UseExtendedFactProp
         if (ogFactError) throw ogFactError;
 
         setData({
-          content: translationData?.[levelColumn as keyof typeof translationData] || 'No extended content available.',
+          content: (translationData?.[levelColumn as keyof typeof translationData] as string | null) || 'No extended content available.',
           ...ogFactData,
         });
       } catch (err: any) {
