@@ -4,14 +4,17 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
 
 type FactCardProps = {
+  factId: string;
   category: string | null;
   subcategory: string | null;
   imageUrl: string | null;
   showImages: boolean;
-  content: string | null;
 };
 
-export function FactCard({ category, subcategory, imageUrl, showImages, content }: FactCardProps) {
+export function FactCard({ factId, category, subcategory, imageUrl, showImages }: FactCardProps) {
+  // Placeholder for content fetching logic
+  const content = 'Loading content...';
+
   return (
     <View style={styles.card}>
       {showImages && imageUrl && (

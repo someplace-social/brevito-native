@@ -1,33 +1,33 @@
 import { FactCard } from '@/components/FactCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
-import { FlatList, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const MOCK_FACTS = [
-  {
-    id: '1',
-    category: 'Science',
-    subcategory: 'Physics',
-    imageUrl: 'https://cdn.pixabay.com/photo/2021/03/11/02/57/mountain-6086083_640.jpg',
-    content: 'The speed of light in a vacuum is exactly 299,792,458 meters per second.',
-  },
-  {
-    id: '2',
-    category: 'History',
-    subcategory: null,
-    imageUrl: 'https://cdn.pixabay.com/photo/2017/08/06/12/02/people-2591874_640.jpg',
-    content: 'The Great Wall of China is not a single continuous wall but a system of fortifications.',
-  },
-  {
-    id: '3',
-    category: 'Animals',
-    subcategory: 'Marine Life',
-    imageUrl: 'https://cdn.pixabay.com/photo/2016/11/29/04/19/ocean-1867285_640.jpg',
-    content: 'An octopus has three hearts; two pump blood through the gills, and the third pumps it to the rest of the body.',
-  },
-];
+import { useFactFeed } from '@/hooks/useFactFeed';
+import {
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function HomeScreen() {
+  const { facts, isLoading, hasMore, loadMore, error } = useFactFeed();
+
+  const renderFooter = () => {
+    if (!hasMore && facts.length > 0) {
+      return (
+        <Text style={styles.footerText}>You've reached the end!</Text>
+      );
+    }
+    if (isLoading) {
+      return <ActivityIndicator size="large" color={Colors.dark.primary} style={styles.spinner} />;
+    }
+    return null;
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -40,20 +40,29 @@ export default function HomeScreen() {
             <IconSymbol name="line.3.horizontal" size={32} color={Colors.dark.foreground} />
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={MOCK_FACTS}
-          renderItem={({ item }) => (
-            <FactCard
-              category={item.category}
-              subcategory={item.subcategory}
-              imageUrl={item.imageUrl}
-              content={item.content}
-              showImages={true}
-            />
-          )}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-        />
+        {error ? (
+          <View style={styles.centeredMessage}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={facts}
+            renderItem={({ item }) => (
+              <FactCard
+                factId={item.id}
+                category={item.category}
+                subcategory={item.subcategory}
+                imageUrl={item.image_url}
+                showImages={true}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -108,5 +117,23 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 16,
     gap: 16,
+  },
+  spinner: {
+    marginVertical: 20,
+  },
+  footerText: {
+    textAlign: 'center',
+    color: Colors.dark.mutedForeground,
+    marginVertical: 20,
+  },
+  centeredMessage: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
   },
 });
