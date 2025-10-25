@@ -1,3 +1,4 @@
+import { ExtendedFactSheet } from '@/components/ExtendedFactSheet';
 import { FactCard } from '@/components/FactCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
@@ -26,6 +27,7 @@ export default function HomeScreen() {
     contentLanguage,
   });
   const [viewableItems, setViewableItems] = useState<string[]>([]);
+  const [extendedFactId, setExtendedFactId] = useState<string | null>(null);
 
   const onViewableItemsChanged = useCallback(({ viewableItems: items }: { viewableItems: ViewToken[] }) => {
     setViewableItems(items.map((item) => item.key as string));
@@ -83,6 +85,7 @@ export default function HomeScreen() {
                 isIntersecting={viewableItems.includes(item.id)}
                 contentLanguage={contentLanguage}
                 level={level}
+                onReadMore={setExtendedFactId}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -94,6 +97,14 @@ export default function HomeScreen() {
           />
         )}
       </View>
+      <ExtendedFactSheet
+        factId={extendedFactId}
+        isVisible={!!extendedFactId}
+        onClose={() => setExtendedFactId(null)}
+        language={contentLanguage}
+        level={level}
+        showImages={showImages}
+      />
     </SafeAreaView>
   );
 }

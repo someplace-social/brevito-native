@@ -1,11 +1,11 @@
-import { Image } from 'expo-image';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { IconSymbol } from './ui/icon-symbol';
 import { useFactContent } from '@/hooks/useFactContent';
-import { SelectableText } from './ui/SelectableText';
-import { useState, useRef } from 'react';
+import { Image } from 'expo-image';
+import { useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
+import { IconSymbol } from './ui/icon-symbol';
+import { SelectableText } from './ui/SelectableText';
 
 type FactCardProps = {
   factId: string;
@@ -16,6 +16,7 @@ type FactCardProps = {
   isIntersecting: boolean;
   contentLanguage: string;
   level: string;
+  onReadMore: (factId: string) => void;
 };
 
 type PopoverState = {
@@ -24,7 +25,7 @@ type PopoverState = {
   selectedWord: string;
 };
 
-export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting, contentLanguage, level }: FactCardProps) {
+export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting, contentLanguage, level, onReadMore }: FactCardProps) {
   const cardRef = useRef<View>(null);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
@@ -92,12 +93,12 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
             />
           )}
         </View>
-        <View style={styles.footerContainer}>
+        <TouchableOpacity onPress={() => onReadMore(factId)} style={styles.footerContainer}>
           <View style={styles.readMoreButton}>
             <Text style={styles.readMoreText}>Read More</Text>
             <IconSymbol name="arrow.up.right" size={12} color={Colors.dark.mutedForeground} />
           </View>
-        </View>
+        </TouchableOpacity>
       </Pressable>
     </View>
   );
