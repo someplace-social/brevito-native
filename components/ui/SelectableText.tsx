@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
-import { Pressable, StyleSheet, Text, TextStyle, View } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, TextStyle, View } from 'react-native';
 
 type SelectableTextProps = {
   text: string;
   onWordSelect: (word: string, ref: React.RefObject<View | null>) => void;
-  style: TextStyle;
+  style: StyleProp<TextStyle>;
 };
 
 // Simple regex to remove common punctuation from the end of a word.
