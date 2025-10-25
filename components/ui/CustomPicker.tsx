@@ -1,13 +1,13 @@
 import { Colors } from '@/constants/Colors';
-import React, auseState } from 'react';
+import React, { useState } from 'react';
 import {
-  Modal,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { IconSymbol } from './icon-symbol';
 
