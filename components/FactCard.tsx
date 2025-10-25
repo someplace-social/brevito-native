@@ -11,13 +11,15 @@ type FactCardProps = {
   imageUrl: string | null;
   showImages: boolean;
   isIntersecting: boolean;
+  contentLanguage: string;
+  level: string;
 };
 
-export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting }: FactCardProps) {
+export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting, contentLanguage, level }: FactCardProps) {
   const { content, error, isLoading } = useFactContent({
     factId,
-    language: 'Spanish', // Hardcoded for now
-    level: 'Beginner', // Hardcoded for now
+    language: contentLanguage,
+    level: level,
     isIntersecting,
   });
 

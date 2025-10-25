@@ -1,5 +1,5 @@
 import { supabase } from '@/supabase';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type Fact = {
   id: string;
@@ -10,29 +10,34 @@ export type Fact = {
   image_url: string | null;
 };
 
+type UseFactFeedProps = {
+  settingsKey: number;
+  selectedCategories: string[];
+  contentLanguage: string;
+};
+
 const PAGE_LIMIT = 5;
 
-export function useFactFeed() {
+export function useFactFeed({ settingsKey, selectedCategories, contentLanguage }: UseFactFeedProps) {
   const [facts, setFacts] = useState<Fact[]>([]);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const prevSettingsKey = useRef(settingsKey);
 
   const fetchFacts = useCallback(async (fetchPage: number, isReset: boolean) => {
     setIsLoading(true);
     setError('');
     try {
       const { data, error } = await supabase.rpc('get_random_facts', {
-        p_categories: null, // For now, fetch from all categories
-        p_language: 'Spanish', // Hardcoded for now
+        p_categories: selectedCategories,
+        p_language: contentLanguage,
         p_limit: PAGE_LIMIT,
         p_offset: fetchPage * PAGE_LIMIT,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const newFacts: Fact[] = data || [];
       setHasMore(newFacts.length === PAGE_LIMIT);
@@ -46,11 +51,20 @@ export function useFactFeed() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedCategories, contentLanguage]);
 
   useEffect(() => {
-    fetchFacts(page, page === 0);
-  }, [page, fetchFacts]);
+    const isReset = prevSettingsKey.current !== settingsKey;
+    if (isReset) {
+      prevSettingsKey.current = settingsKey;
+      setFacts([]);
+      setPage(0);
+      setHasMore(true);
+      fetchFacts(0, true);
+    } else {
+      fetchFacts(page, false);
+    }
+  }, [page, settingsKey, fetchFacts]);
 
   const loadMore = () => {
     if (hasMore && !isLoading) {
@@ -58,11 +72,5 @@ export function useFactFeed() {
     }
   };
 
-  const refetch = () => {
-    setFacts([]);
-    setPage(0);
-    setHasMore(true);
-  };
-
-  return { facts, error, isLoading, hasMore, loadMore, refetch };
+  return { facts, error, isLoading, hasMore, loadMore };
 }

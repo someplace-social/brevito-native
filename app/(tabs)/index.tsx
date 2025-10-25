@@ -1,7 +1,9 @@
 import { FactCard } from '@/components/FactCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/Colors';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFactFeed } from '@/hooks/useFactFeed';
+import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,17 +18,20 @@ import {
 } from 'react-native';
 
 export default function HomeScreen() {
-  const { facts, isLoading, hasMore, loadMore, error } = useFactFeed();
+  const router = useRouter();
+  const { settingsKey, selectedCategories, contentLanguage, level, showImages } = useAppSettings();
+  const { facts, isLoading, hasMore, loadMore, error } = useFactFeed({
+    settingsKey,
+    selectedCategories,
+    contentLanguage,
+  });
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const onViewableItemsChanged = useCallback(({ viewableItems: items }: { viewableItems: ViewToken[] }) => {
     setViewableItems(items.map((item) => item.key as string));
   }, []);
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50, // Item is considered visible when 50% of it is visible
-  };
-
+  const viewabilityConfig = { itemVisiblePercentThreshold: 50 };
   const viewabilityConfigCallbackPairs = useRef([{ viewabilityConfig, onViewableItemsChanged }]);
 
   const renderFooter = () => {
@@ -57,7 +62,7 @@ export default function HomeScreen() {
             <Text style={styles.title}>Brevito</Text>
             <Text style={styles.subtitle}>Learn while you doomscroll</Text>
           </View>
-          <TouchableOpacity style={styles.menuButton}>
+          <TouchableOpacity style={styles.menuButton} onPress={() => router.push('/settings')}>
             <IconSymbol name="line.3.horizontal" size={32} color={Colors.dark.foreground} />
           </TouchableOpacity>
         </View>
@@ -74,8 +79,10 @@ export default function HomeScreen() {
                 category={item.category}
                 subcategory={item.subcategory}
                 imageUrl={item.image_url}
-                showImages={true}
+                showImages={showImages}
                 isIntersecting={viewableItems.includes(item.id)}
+                contentLanguage={contentLanguage}
+                level={level}
               />
             )}
             keyExtractor={(item) => item.id}
