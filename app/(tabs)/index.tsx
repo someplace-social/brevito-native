@@ -20,7 +20,17 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { settingsKey, selectedCategories, contentLanguage, level, showImages } = useAppSettings();
+  const {
+    settingsKey,
+    selectedCategories,
+    setSelectedCategories,
+    contentLanguage,
+    translationLanguage,
+    level,
+    showImages,
+    fontSize,
+  } = useAppSettings();
+
   const { facts, isLoading, hasMore, loadMore, error } = useFactFeed({
     settingsKey,
     selectedCategories,
@@ -35,6 +45,12 @@ export default function HomeScreen() {
 
   const viewabilityConfig = { itemVisiblePercentThreshold: 50 };
   const viewabilityConfigCallbackPairs = useRef([{ viewabilityConfig, onViewableItemsChanged }]);
+
+  const handleCategoryFilter = (category: string) => {
+    if (category && (selectedCategories.length !== 1 || selectedCategories[0] !== category)) {
+      setSelectedCategories([category]);
+    }
+  };
 
   const renderFooter = () => {
     if (!hasMore && facts.length > 0) {
@@ -84,8 +100,11 @@ export default function HomeScreen() {
                 showImages={showImages}
                 isIntersecting={viewableItems.includes(item.id)}
                 contentLanguage={contentLanguage}
+                translationLanguage={translationLanguage}
                 level={level}
                 onReadMore={setExtendedFactId}
+                onCategoryFilter={handleCategoryFilter}
+                fontSize={fontSize}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -104,6 +123,7 @@ export default function HomeScreen() {
         language={contentLanguage}
         level={level}
         showImages={showImages}
+        fontSize={fontSize}
       />
     </SafeAreaView>
   );

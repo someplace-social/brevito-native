@@ -1,11 +1,12 @@
 import { Colors } from '@/constants/Colors';
+import { FONT_SIZES } from '@/hooks/useAppSettings';
 import { Image } from 'expo-image';
 import { StyleSheet, Switch, Text, View } from 'react-native';
-// We will create a custom Slider component later. For now, we'll use placeholders.
+import { FontSizeStepper } from '../ui/FontSizeStepper';
 
 type AppearanceViewProps = {
-  stagedFontSize: string;
-  setStagedFontSize: (value: string) => void;
+  stagedFontSize: number;
+  setStagedFontSize: (value: number) => void;
   stagedShowImages: boolean;
   setStagedShowImages: (value: boolean) => void;
 };
@@ -26,18 +27,19 @@ export function AppearanceView({
           />
         )}
         <View style={styles.cardContent}>
-          <Text style={styles.previewText}>
+          <Text style={[styles.previewText, { fontSize: stagedFontSize }]}>
             This is how the text will look. Adjust the slider below to change the size.
           </Text>
         </View>
       </View>
 
       <View style={styles.controls}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Font Size</Text>
-          <Text style={styles.value}>{stagedFontSize}</Text>
-        </View>
-        <View style={[styles.row, styles.switchRow]}>
+        <FontSizeStepper
+          currentSize={stagedFontSize}
+          onSizeChange={setStagedFontSize}
+          sizeOptions={FONT_SIZES}
+        />
+        <View style={styles.switchRow}>
           <Text style={styles.label}>Show Images</Text>
           <Switch
             value={stagedShowImages}
@@ -71,13 +73,9 @@ const styles = StyleSheet.create({
   },
   previewText: {
     color: Colors.dark.foreground,
-    fontSize: 16,
   },
   controls: {
     gap: 24,
-  },
-  row: {
-    gap: 8,
   },
   switchRow: {
     flexDirection: 'row',
@@ -86,10 +84,6 @@ const styles = StyleSheet.create({
   },
   label: {
     color: Colors.dark.foreground,
-    fontSize: 16,
-  },
-  value: {
-    color: Colors.dark.mutedForeground,
     fontSize: 16,
   },
 });

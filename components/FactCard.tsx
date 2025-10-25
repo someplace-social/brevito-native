@@ -16,8 +16,11 @@ type FactCardProps = {
   showImages: boolean;
   isIntersecting: boolean;
   contentLanguage: string;
+  translationLanguage: string;
   level: string;
   onReadMore: (factId: string) => void;
+  onCategoryFilter: (category: string) => void;
+  fontSize: number;
 };
 
 type PopoverState = {
@@ -26,7 +29,20 @@ type PopoverState = {
   selectedWord: string;
 };
 
-export function FactCard({ factId, category, subcategory, imageUrl, showImages, isIntersecting, contentLanguage, level, onReadMore }: FactCardProps) {
+export function FactCard({
+  factId,
+  category,
+  subcategory,
+  imageUrl,
+  showImages,
+  isIntersecting,
+  contentLanguage,
+  translationLanguage,
+  level,
+  onReadMore,
+  onCategoryFilter,
+  fontSize,
+}: FactCardProps) {
   const cardRef = useRef<View>(null);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
@@ -75,7 +91,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
             position={popoverState.position}
             selectedWord={popoverState.selectedWord}
             contentLanguage={contentLanguage}
-            translationLanguage={'English'} // Hardcoded for now
+            translationLanguage={translationLanguage}
             context={content}
             onLearnMore={handleLearnMore}
           />
@@ -86,8 +102,17 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
         <View style={styles.contentContainer}>
           {category && (
             <View style={styles.categoryContainer}>
-              <Text style={styles.categoryText}>{category}</Text>
-              {subcategory && <Text style={styles.categoryText}> &gt; {subcategory}</Text>}
+              <TouchableOpacity onPress={() => onCategoryFilter(category)}>
+                <Text style={styles.categoryText}>{category}</Text>
+              </TouchableOpacity>
+              {subcategory && (
+                <>
+                  <Text style={styles.categoryText}> &gt; </Text>
+                  <TouchableOpacity onPress={() => onCategoryFilter(category)}>
+                    <Text style={styles.categoryText}>{subcategory}</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           )}
           {isLoading && <ActivityIndicator color={Colors.dark.primary} />}
@@ -96,7 +121,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
             <SelectableText
               text={content}
               onWordSelect={handleWordSelect}
-              style={styles.contentText}
+              style={[styles.contentText, { fontSize }]}
             />
           )}
         </View>
@@ -112,7 +137,7 @@ export function FactCard({ factId, category, subcategory, imageUrl, showImages, 
         onClose={() => setIsDrawerOpen(false)}
         selectedText={popoverState.selectedWord}
         sourceLanguage={contentLanguage}
-        targetLanguage={'English'} // Hardcoded for now
+        targetLanguage={translationLanguage}
       />
     </View>
   );
@@ -148,7 +173,6 @@ const styles = StyleSheet.create({
   },
   contentText: {
     color: Colors.dark.foreground,
-    fontSize: 18,
     lineHeight: 26,
   },
   errorText: {

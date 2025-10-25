@@ -3,14 +3,14 @@ import { useExtendedFact } from '@/hooks/useExtendedFact';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import {
-    ActivityIndicator,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
 
@@ -21,6 +21,7 @@ type ExtendedFactSheetProps = {
   language: string;
   level: string;
   showImages: boolean;
+  fontSize: number;
 };
 
 export function ExtendedFactSheet({
@@ -30,6 +31,7 @@ export function ExtendedFactSheet({
   language,
   level,
   showImages,
+  fontSize,
 }: ExtendedFactSheetProps) {
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
 
@@ -62,7 +64,7 @@ export function ExtendedFactSheet({
                   {data.subcategory && ` > ${data.subcategory}`}
                 </Text>
               )}
-              <Text style={styles.contentText}>{data.content}</Text>
+              <Text style={[styles.contentText, { fontSize }]}>{data.content}</Text>
               {data.source && data.source_url && (
                 <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
                   <Text style={styles.sourceText}>Source: {data.source}</Text>
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
   },
   contentText: {
     color: Colors.dark.foreground,
-    fontSize: 18,
     lineHeight: 28,
   },
   sourceButton: {

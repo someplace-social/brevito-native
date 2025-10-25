@@ -1,15 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 
-const availableCategories = ["Science", "Technology", "Health", "History", "Business", "Society", "Art", "Sports", "Environment", "Culture", "Food", "Geography", "Psychology", "Animals", "Space", "Language", "Unusual"];
-const fontSizes = ["text-sm", "text-base", "text-lg", "text-xl", "text-2xl"];
+export const FONT_SIZES = [14, 16, 18, 20, 22] as const;
+export const AVAILABLE_CATEGORIES = ["Science", "Technology", "Health", "History", "Business", "Society", "Art", "Sports", "Environment", "Culture", "Food", "Geography", "Psychology", "Animals", "Space", "Language", "Unusual"];
 
 export function useAppSettings() {
   const [contentLanguage, setContentLanguage] = useState("Spanish");
   const [translationLanguage, setTranslationLanguage] = useState("English");
   const [level, setLevel] = useState("Beginner");
-  const [fontSize, setFontSize] = useState("text-lg");
-  const [selectedCategories, setSelectedCategories] = useState(availableCategories);
+  const [fontSize, setFontSize] = useState<number>(18);
+  const [selectedCategories, setSelectedCategories] = useState(AVAILABLE_CATEGORIES);
   const [showImages, setShowImages] = useState(true);
   
   const [isInitialized, setIsInitialized] = useState(false);
@@ -18,26 +18,33 @@ export function useAppSettings() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const savedContentLang = await AsyncStorage.getItem("brevito-content-language");
-        const savedTranslationLang = await AsyncStorage.getItem("brevito-translation-language");
-        const savedLevel = await AsyncStorage.getItem("brevito-level");
-        const savedFontSize = await AsyncStorage.getItem("brevito-font-size");
-        const savedCategories = await AsyncStorage.getItem("brevito-categories");
-        const savedShowImages = await AsyncStorage.getItem("brevito-show-images");
+        const settings = await AsyncStorage.multiGet([
+          "brevito-content-language",
+          "brevito-translation-language",
+          "brevito-level",
+          "brevito-font-size",
+          "brevito-categories",
+          "brevito-show-images",
+        ]);
 
-        if (savedContentLang) setContentLanguage(savedContentLang);
-        if (savedTranslationLang) setTranslationLanguage(savedTranslationLang);
-        if (savedLevel) setLevel(savedLevel);
-        if (savedFontSize && fontSizes.includes(savedFontSize)) setFontSize(savedFontSize);
+        const settingsMap = new Map(settings);
+        
+        setContentLanguage(settingsMap.get("brevito-content-language") || "Spanish");
+        setTranslationLanguage(settingsMap.get("brevito-translation-language") || "English");
+        setLevel(settingsMap.get("brevito-level") || "Beginner");
+        
+        const savedFontSize = settingsMap.get("brevito-font-size");
+        if (savedFontSize) setFontSize(JSON.parse(savedFontSize));
+
+        const savedCategories = settingsMap.get("brevito-categories");
         if (savedCategories) {
-          const parsedCategories = JSON.parse(savedCategories);
-          if (Array.isArray(parsedCategories) && parsedCategories.length > 0) {
-            setSelectedCategories(parsedCategories);
-          }
+          const parsed = JSON.parse(savedCategories);
+          if (Array.isArray(parsed) && parsed.length > 0) setSelectedCategories(parsed);
         }
-        if (savedShowImages) {
-          setShowImages(JSON.parse(savedShowImages));
-        }
+
+        const savedShowImages = settingsMap.get("brevito-show-images");
+        if (savedShowImages) setShowImages(JSON.parse(savedShowImages));
+
       } catch (error) {
         console.error("Failed to load settings from storage", error);
       } finally {
@@ -53,12 +60,15 @@ export function useAppSettings() {
     
     const saveSettings = async () => {
       try {
-        await AsyncStorage.setItem("brevito-content-language", contentLanguage);
-        await AsyncStorage.setItem("brevito-translation-language", translationLanguage);
-        await AsyncStorage.setItem("brevito-level", level);
-        await AsyncStorage.setItem("brevito-font-size", fontSize);
-        await AsyncStorage.setItem("brevito-categories", JSON.stringify(selectedCategories));
-        await AsyncStorage.setItem("brevito-show-images", JSON.stringify(showImages));
+        const settings: [string, string][] = [
+          ["brevito-content-language", contentLanguage],
+          ["brevito-translation-language", translationLanguage],
+          ["brevito-level", level],
+          ["brevito-font-size", JSON.stringify(fontSize)],
+          ["brevito-categories", JSON.stringify(selectedCategories)],
+          ["brevito-show-images", JSON.stringify(showImages)],
+        ];
+        await AsyncStorage.multiSet(settings);
       } catch (error) {
         console.error("Failed to save settings to storage", error);
       }
