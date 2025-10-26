@@ -79,8 +79,13 @@ export function FactCard({
     }
   };
 
+  const handleClosePopover = () => {
+    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+  };
+
   const handlePressOut = (event: NativeSyntheticEvent<any>) => {
     const finalSelection = lastValidSelection.current;
+
     if (finalSelection && finalSelection.start !== finalSelection.end && content) {
       const selectedText = content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
@@ -88,30 +93,20 @@ export function FactCard({
         cardRef.current?.measure((_fx, _fy, width, _height, px, py) => {
           const popoverWidth = 200;
           const popoverHeight = 60;
-
           const touchX = event.nativeEvent.pageX;
           const touchY = event.nativeEvent.pageY;
-
           let top = touchY - py - popoverHeight - 10;
           let left = touchX - px - popoverWidth / 2;
-
           if (left + popoverWidth > width) left = width - popoverWidth - 16;
           if (left < 0) left = 16;
           if (top < 0) top = touchY - py + 20;
-
-          setPopoverState({
-            isVisible: true,
-            selectedWord: selectedText,
-            position: { top, left },
-          });
+          setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
         });
       }
       lastValidSelection.current = undefined;
+    } else if (popoverState.isVisible) {
+      handleClosePopover();
     }
-  };
-
-  const handleClosePopover = () => {
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
   };
 
   const handleLearnMore = () => {
@@ -227,11 +222,7 @@ export function FactCard({
             )}
             {isLoading && <ActivityIndicator color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
-            {content && (
-              <View onStartShouldSetResponder={() => true}>
-                <TextInput {...(textInputProps as any)} />
-              </View>
-            )}
+            {content && <TextInput {...(textInputProps as any)} />}
           </View>
           <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
             <View style={styles.readMoreButton}>

@@ -75,8 +75,13 @@ export function ExtendedFactSheet({
     }
   };
 
+  const handleClosePopover = () => {
+    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+  };
+
   const handlePressOut = (event: NativeSyntheticEvent<any>) => {
     const finalSelection = lastValidSelection.current;
+
     if (finalSelection && finalSelection.start !== finalSelection.end && data?.content) {
       const selectedText = data.content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
@@ -84,30 +89,20 @@ export function ExtendedFactSheet({
         sheetRef.current?.measure((_fx, _fy, width, _height, px, py) => {
           const popoverWidth = 200;
           const popoverHeight = 60;
-
           const touchX = event.nativeEvent.pageX;
           const touchY = event.nativeEvent.pageY;
-
           let top = touchY - py - popoverHeight - 10;
           let left = touchX - px - popoverWidth / 2;
-
           if (left + popoverWidth > width) left = width - popoverWidth - 16;
           if (left < 0) left = 16;
           if (top < 0) top = touchY - py + 20;
-
-          setPopoverState({
-            isVisible: true,
-            selectedWord: selectedText,
-            position: { top, left },
-          });
+          setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
         });
       }
       lastValidSelection.current = undefined;
+    } else if (popoverState.isVisible) {
+      handleClosePopover();
     }
-  };
-
-  const handleClosePopover = () => {
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
   };
 
   const handleLearnMore = () => {
@@ -244,11 +239,7 @@ export function ExtendedFactSheet({
                       {data.subcategory && ` > ${data.subcategory}`}
                     </Text>
                   )}
-                  {data.content && (
-                    <View onStartShouldSetResponder={() => true}>
-                      <TextInput {...(textInputProps as any)} />
-                    </View>
-                  )}
+                  {data.content && <TextInput {...(textInputProps as any)} />}
                   {data.source && data.source_url && (
                     <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
                       <Text style={styles.sourceText}>Source: {data.source}</Text>
