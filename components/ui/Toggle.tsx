@@ -17,11 +17,11 @@ export function Toggle({ children, pressed, onPressedChange, disabled, style, te
   const styles = useMemo(() => StyleSheet.create({
     toggle: {
       paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 6,
+      paddingHorizontal: 16,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: 'transparent',
+      backgroundColor: colors.secondary,
     },
     togglePressed: {
       backgroundColor: colors.primary,
@@ -34,8 +34,9 @@ export function Toggle({ children, pressed, onPressedChange, disabled, style, te
       opacity: 0.5,
     },
     text: {
-      color: colors.foreground,
+      color: colors.secondaryForeground,
       fontSize: 16,
+      fontWeight: '600',
     },
     textPressed: {
       color: colors.primaryForeground,

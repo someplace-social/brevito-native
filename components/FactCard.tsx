@@ -1,9 +1,10 @@
 import { ColorTheme } from '@/constants/Colors';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFactContent } from '@/hooks/useFactContent';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
 import { SelectableText } from './ui/SelectableText';
@@ -47,6 +48,7 @@ export function FactCard({
   colors,
 }: FactCardProps) {
   const cardRef = useRef<View>(null);
+  const { theme } = useAppSettings();
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
     position: null,
@@ -101,10 +103,21 @@ export function FactCard({
     card: {
       backgroundColor: colors.card,
       borderRadius: 12,
-      borderWidth: 1,
+      borderWidth: theme === 'light' ? 0 : 1,
       borderColor: colors.border,
       overflow: 'hidden',
       minHeight: 100,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: theme === 'light' ? 0.1 : 0,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: theme === 'light' ? 4 : 0,
+        },
+      }),
     },
     image: {
       width: '100%',
@@ -146,7 +159,7 @@ export function FactCard({
       color: colors.mutedForeground,
       fontSize: 14,
     },
-  }), [colors]);
+  }), [colors, theme]);
 
   return (
     <View ref={cardRef}>
