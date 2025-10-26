@@ -40,27 +40,17 @@ export function useWordAnalysis({
       setIsLoading(true);
       setError(null);
       try {
-        // NOTE: This fetches pre-computed analysis from the database.
-        // A Supabase Edge Function would be needed to call a generative AI API
-        // to create and insert new analyses without exposing API keys.
-        const { data, error } = await supabase
-          .from('word_analysis')
-          .select('analysis')
-          .eq('word', word.toLowerCase())
-          .eq('source_language', sourceLanguage)
-          .eq('target_language', targetLanguage)
-          .limit(1)
-          .single();
+        const { data, error: invokeError } = await supabase.functions.invoke('analyze-word', {
+          body: { word, sourceLanguage, targetLanguage },
+        });
 
-        if (error && error.code !== 'PGRST116') {
-          throw error;
+        if (invokeError) throw invokeError;
+        
+        if (data.error) {
+          throw new Error(data.error);
         }
 
-        if (data) {
-          setAnalysis(data.analysis as WordAnalysisData);
-        } else {
-          setError('No analysis found for this word.');
-        }
+        setAnalysis(data as WordAnalysisData);
       } catch (err: any) {
         setError(err.message || 'An error occurred fetching analysis.');
       } finally {
