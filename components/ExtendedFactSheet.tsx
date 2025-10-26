@@ -10,18 +10,17 @@ import {
   Modal,
   NativeSyntheticEvent,
   Platform,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
-import { SelectableText } from './ui/SelectableText';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type ExtendedFactSheetProps = {
@@ -209,43 +208,47 @@ export function ExtendedFactSheet({
             {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {data && (
-              <Pressable onPress={handleClosePopover}>
-                <View style={styles.content} ref={sheetRef}>
-                  {showImages && data.image_url && (
-                    <Image source={{ uri: data.image_url }} style={styles.image} />
-                  )}
-                  {data.category && (
-                    <Text style={styles.categoryText}>
-                      {data.category}
-                      {data.subcategory && ` > ${data.subcategory}`}
-                    </Text>
-                  )}
-                  {data.content && (
-                    <SelectableText
-                      value={data.content}
-                      onSelectionChange={handleSelectionChange}
-                      onPressOut={handlePressOut}
-                      style={[styles.contentText, { fontSize }]}
-                    />
-                  )}
-                  {data.source && data.source_url && (
-                    <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
-                      <Text style={styles.sourceText}>Source: {data.source}</Text>
-                      <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
-                    </TouchableOpacity>
-                  )}
-                  <TranslationPopover
-                    isVisible={popoverState.isVisible}
-                    position={popoverState.position}
-                    selectedWord={popoverState.selectedWord}
-                    contentLanguage={language}
-                    translationLanguage={translationLanguage}
-                    context={data.content}
-                    onLearnMore={handleLearnMore}
-                    colors={colors}
+              <View style={styles.content} ref={sheetRef}>
+                {showImages && data.image_url && (
+                  <Image source={{ uri: data.image_url }} style={styles.image} />
+                )}
+                {data.category && (
+                  <Text style={styles.categoryText}>
+                    {data.category}
+                    {data.subcategory && ` > ${data.subcategory}`}
+                  </Text>
+                )}
+                {data.content && (
+                  <TextInput
+                    value={data.content}
+                    multiline
+                    onSelectionChange={handleSelectionChange}
+                    onPressOut={handlePressOut}
+                    style={[styles.contentText, { fontSize }]}
+                    scrollEnabled={false}
+                    contextMenuHidden
+                    editable={false}
+                    selectable
+                    caretHidden
                   />
-                </View>
-              </Pressable>
+                )}
+                {data.source && data.source_url && (
+                  <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
+                    <Text style={styles.sourceText}>Source: {data.source}</Text>
+                    <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
+                  </TouchableOpacity>
+                )}
+                <TranslationPopover
+                  isVisible={popoverState.isVisible}
+                  position={popoverState.position}
+                  selectedWord={popoverState.selectedWord}
+                  contentLanguage={language}
+                  translationLanguage={translationLanguage}
+                  context={data.content}
+                  onLearnMore={handleLearnMore}
+                  colors={colors}
+                />
+              </View>
             )}
           </ScrollView>
         </SafeAreaView>

@@ -6,16 +6,15 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
-  Pressable,
   StyleSheet,
   Text,
+  TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
-import { SelectableText } from './ui/SelectableText';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type FactCardProps = {
@@ -179,46 +178,50 @@ export function FactCard({
 
   return (
     <View ref={cardRef}>
-      <Pressable onPress={handleClosePopover}>
-        <View style={styles.card}>
-          {showImages && imageUrl && (
-            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
-          )}
-          <View style={styles.contentContainer}>
-            {category && (
-              <View style={styles.categoryContainer}>
-                <TouchableOpacity onPress={() => handleCategoryPress(category)}>
-                  <Text style={styles.categoryText}>{category}</Text>
-                </TouchableOpacity>
-                {subcategory && (
-                  <>
-                    <Text style={styles.categoryText}> &gt; </Text>
-                    <TouchableOpacity onPress={() => handleCategoryPress(category)}>
-                      <Text style={styles.categoryText}>{subcategory}</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
-            )}
-            {isLoading && <ActivityIndicator color={colors.primary} />}
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            {content && (
-              <SelectableText
-                value={content}
-                onSelectionChange={handleSelectionChange}
-                onPressOut={handlePressOut}
-                style={[styles.contentText, { fontSize }]}
-              />
-            )}
-          </View>
-          <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
-            <View style={styles.readMoreButton}>
-              <Text style={styles.readMoreText}>Read More</Text>
-              <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
+      <View style={styles.card}>
+        {showImages && imageUrl && (
+          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
+        )}
+        <View style={styles.contentContainer}>
+          {category && (
+            <View style={styles.categoryContainer}>
+              <TouchableOpacity onPress={() => handleCategoryPress(category)}>
+                <Text style={styles.categoryText}>{category}</Text>
+              </TouchableOpacity>
+              {subcategory && (
+                <>
+                  <Text style={styles.categoryText}> &gt; </Text>
+                  <TouchableOpacity onPress={() => handleCategoryPress(category)}>
+                    <Text style={styles.categoryText}>{subcategory}</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
-          </TouchableOpacity>
+          )}
+          {isLoading && <ActivityIndicator color={colors.primary} />}
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          {content && (
+            <TextInput
+              value={content}
+              multiline
+              onSelectionChange={handleSelectionChange}
+              onPressOut={handlePressOut}
+              style={[styles.contentText, { fontSize }]}
+              scrollEnabled={false}
+              contextMenuHidden
+              editable={false}
+              selectable
+              caretHidden
+            />
+          )}
         </View>
-      </Pressable>
+        <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
+          <View style={styles.readMoreButton}>
+            <Text style={styles.readMoreText}>Read More</Text>
+            <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
+          </View>
+        </TouchableOpacity>
+      </View>
       <TranslationPopover
         isVisible={popoverState.isVisible}
         position={popoverState.position}
