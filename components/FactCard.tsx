@@ -112,11 +112,12 @@ export function FactCard({
   const handleLearnMore = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsDrawerOpen(true);
-    handleClosePopover();
+    setPopoverState(prev => ({ ...prev, isVisible: false }));
   };
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
+    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
   };
 
   const handleCategoryPress = (cat: string) => {
