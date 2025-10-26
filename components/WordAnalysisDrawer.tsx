@@ -77,9 +77,13 @@ export function WordAnalysisDrawer({
     },
     safeArea: {
       height: '90%',
-      backgroundColor: colors.background,
       borderTopLeftRadius: 12,
       borderTopRightRadius: 12,
+      overflow: 'hidden',
+    },
+    contentWrapper: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
     header: {
       flexDirection: 'row',
@@ -172,42 +176,44 @@ export function WordAnalysisDrawer({
     <Modal animationType="slide" transparent visible={isOpen} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <SafeAreaView style={styles.safeArea}>
-          <View style={styles.header}>
-            <Text style={styles.title}>{selectedText}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <IconSymbol name="xmark" size={20} color={colors.mutedForeground} />
-            </TouchableOpacity>
-          </View>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            {isLoading && (
-              <View style={styles.centered}>
-                <ActivityIndicator size="large" color={colors.primary} />
-              </View>
-            )}
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            {analysis && (
-              <View style={styles.analysisContainer}>
-                {analysis.rootWord && selectedText.toLowerCase() !== analysis.rootWord.toLowerCase() && (
-                  <View style={styles.rootWordContainer}>
-                    <Text style={styles.sectionTitle}>ROOT</Text>
-                    <Text style={styles.rootWordText}>{analysis.rootWord}</Text>
-                  </View>
-                )}
-                {analysis.analysis?.map((item: MeaningAnalysis, index: number) => (
-                  <View key={index} style={styles.meaningBlock}>
-                    <Text style={styles.translationText}>{item.translation}</Text>
-                    <Text style={styles.posText}>{item.partOfSpeech}</Text>
-                    <View style={styles.exampleContainer}>
-                      <Text style={styles.exampleSentence}>
-                        <UnderlinedSentence sentence={item.exampleSentence} word={selectedText} style={styles.underline} />
-                      </Text>
-                      <Text style={styles.exampleTranslation}>{item.exampleTranslation}</Text>
+          <View style={styles.contentWrapper}>
+            <View style={styles.header}>
+              <Text style={styles.title}>{selectedText}</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <IconSymbol name="xmark" size={20} color={colors.mutedForeground} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              {isLoading && (
+                <View style={styles.centered}>
+                  <ActivityIndicator size="large" color={colors.primary} />
+                </View>
+              )}
+              {error && <Text style={styles.errorText}>{error}</Text>}
+              {analysis && (
+                <View style={styles.analysisContainer}>
+                  {analysis.rootWord && selectedText.toLowerCase() !== analysis.rootWord.toLowerCase() && (
+                    <View style={styles.rootWordContainer}>
+                      <Text style={styles.sectionTitle}>ROOT</Text>
+                      <Text style={styles.rootWordText}>{analysis.rootWord}</Text>
                     </View>
-                  </View>
-                ))}
-              </View>
-            )}
-          </ScrollView>
+                  )}
+                  {analysis.analysis?.map((item: MeaningAnalysis, index: number) => (
+                    <View key={index} style={styles.meaningBlock}>
+                      <Text style={styles.translationText}>{item.translation}</Text>
+                      <Text style={styles.posText}>{item.partOfSpeech}</Text>
+                      <View style={styles.exampleContainer}>
+                        <Text style={styles.exampleSentence}>
+                          <UnderlinedSentence sentence={item.exampleSentence} word={selectedText} style={styles.underline} />
+                        </Text>
+                        <Text style={styles.exampleTranslation}>{item.exampleTranslation}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          </View>
         </SafeAreaView>
       </View>
     </Modal>
