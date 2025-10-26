@@ -185,6 +185,20 @@ export function ExtendedFactSheet({
     },
   }), [colors]);
 
+  const textInputProps = {
+    value: data?.content,
+    multiline: true,
+    onSelectionChange: handleSelectionChange,
+    onPressOut: handlePressOut,
+    style: [styles.contentText, { fontSize }],
+    scrollEnabled: false,
+    contextMenuHidden: true,
+    editable: Platform.OS === 'android',
+    showSoftInputOnFocus: false,
+    selectable: true,
+    caretHidden: true,
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -218,22 +232,7 @@ export function ExtendedFactSheet({
                     {data.subcategory && ` > ${data.subcategory}`}
                   </Text>
                 )}
-                {data.content && (
-                  // @ts-ignore - `selectable` prop is valid but causes a type error.
-                  <TextInput
-                    value={data.content}
-                    multiline
-                    onSelectionChange={handleSelectionChange}
-                    onPressOut={handlePressOut}
-                    style={[styles.contentText, { fontSize }]}
-                    scrollEnabled={false}
-                    contextMenuHidden
-                    editable={Platform.OS === 'android'}
-                    showSoftInputOnFocus={false}
-                    selectable
-                    caretHidden
-                  />
-                )}
+                {data.content && <TextInput {...(textInputProps as any)} />}
                 {data.source && data.source_url && (
                   <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
                     <Text style={styles.sourceText}>Source: {data.source}</Text>

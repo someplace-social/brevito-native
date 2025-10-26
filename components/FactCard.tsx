@@ -177,6 +177,20 @@ export function FactCard({
     },
   }), [colors]);
 
+  const textInputProps = {
+    value: content,
+    multiline: true,
+    onSelectionChange: handleSelectionChange,
+    onPressOut: handlePressOut,
+    style: [styles.contentText, { fontSize }],
+    scrollEnabled: false,
+    contextMenuHidden: true,
+    editable: Platform.OS === 'android',
+    showSoftInputOnFocus: false,
+    selectable: true,
+    caretHidden: true,
+  };
+
   return (
     <View ref={cardRef}>
       <View style={styles.card}>
@@ -201,22 +215,7 @@ export function FactCard({
           )}
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
-          {content && (
-            // @ts-ignore - `selectable` prop is valid but causes a type error.
-            <TextInput
-              value={content}
-              multiline
-              onSelectionChange={handleSelectionChange}
-              onPressOut={handlePressOut}
-              style={[styles.contentText, { fontSize }]}
-              scrollEnabled={false}
-              contextMenuHidden
-              editable={Platform.OS === 'android'}
-              showSoftInputOnFocus={false}
-              selectable
-              caretHidden
-            />
-          )}
+          {content && <TextInput {...(textInputProps as any)} />}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
           <View style={styles.readMoreButton}>
