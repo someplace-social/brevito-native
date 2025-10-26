@@ -43,12 +43,12 @@ const dark = {
 };
 
 const honey = {
-  background: '#E8DDB5',
-  foreground: '#383126',
-  card: '#F0E6C9',
-  cardForeground: '#383126',
-  popover: '#F0E6C9',
-  popoverForeground: '#383126',
+  background: '#F2E8D9',
+  foreground: '#4A4033',
+  card: '#F7F0E1',
+  cardForeground: '#4A4033',
+  popover: '#F7F0E1',
+  popoverForeground: '#4A4033',
   primary: '#B58950',
   primaryForeground: '#FBF8F0',
   secondary: '#5C4A2C',
@@ -186,3 +186,4 @@ export const Colors = {
 };
 
 export type ThemeName = keyof typeof Colors;
+export type ColorTheme = typeof light;

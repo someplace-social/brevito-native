@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,13 +14,13 @@ import {
 import { ExtendedFactSheet } from '../components/ExtendedFactSheet';
 import { FactCard } from '../components/FactCard';
 import { IconSymbol } from '../components/ui/icon-symbol';
-import { Colors } from '../constants/Colors';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { useFactFeed } from '../hooks/useFactFeed';
 
 export default function HomeScreen() {
   const router = useRouter();
   const {
+    colors,
     settingsKey,
     selectedCategories,
     setSelectedCategories,
@@ -52,12 +52,84 @@ export default function HomeScreen() {
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingBottom: 12,
+      paddingTop: 32,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      backgroundColor: colors.background,
+      ...Platform.select({
+        android: {
+          elevation: 4,
+        },
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+        },
+      }),
+    },
+    headerTitleContainer: {
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: colors.foreground,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.mutedForeground,
+    },
+    menuButton: {
+      position: 'absolute',
+      right: 16,
+      top: '50%',
+      transform: [{ translateY: 16 }],
+    },
+    listContent: {
+      padding: 16,
+      gap: 16,
+    },
+    spinner: {
+      marginVertical: 20,
+    },
+    footerText: {
+      textAlign: 'center',
+      color: colors.mutedForeground,
+      marginVertical: 20,
+    },
+    centeredMessage: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
+    },
+    errorText: {
+      color: colors.destructive,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   const renderFooter = () => {
     if (!hasMore && facts.length > 0) {
       return <Text style={styles.footerText}>You've reached the end!</Text>;
     }
     if (isLoading && facts.length > 0) {
-      return <ActivityIndicator size="large" color={Colors.dark.primary} style={styles.spinner} />;
+      return <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />;
     }
     return null;
   };
@@ -66,7 +138,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.centeredMessage}>
-          <ActivityIndicator size="large" color={Colors.dark.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
@@ -81,7 +153,7 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>Learn while you doomscroll</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => router.push('/settings' as any)}>
-            <IconSymbol name="line.3.horizontal" size={32} color={Colors.dark.foreground} />
+            <IconSymbol name="line.3.horizontal" size={32} color={colors.foreground} />
           </TouchableOpacity>
         </View>
         {error ? (
@@ -105,6 +177,7 @@ export default function HomeScreen() {
                 onReadMore={setExtendedFactId}
                 onCategoryFilter={handleCategoryFilter}
                 fontSize={fontSize}
+                colors={colors}
               />
             )}
             keyExtractor={(item) => item.id}
@@ -124,79 +197,8 @@ export default function HomeScreen() {
         level={level}
         showImages={showImages}
         fontSize={fontSize}
+        colors={colors}
       />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    paddingTop: 32,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-    backgroundColor: Colors.dark.background,
-    ...Platform.select({
-      android: {
-        elevation: 4,
-      },
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-    }),
-  },
-  headerTitleContainer: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: Colors.dark.foreground,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.dark.mutedForeground,
-  },
-  menuButton: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
-    transform: [{ translateY: 16 }],
-  },
-  listContent: {
-    padding: 16,
-    gap: 16,
-  },
-  spinner: {
-    marginVertical: 20,
-  },
-  footerText: {
-    textAlign: 'center',
-    color: Colors.dark.mutedForeground,
-    marginVertical: 20,
-  },
-  centeredMessage: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-  },
-});
