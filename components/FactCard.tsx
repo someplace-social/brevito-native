@@ -6,8 +6,10 @@ import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
+  Pressable,
   StyleSheet,
   Text,
+  TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
@@ -30,9 +32,6 @@ type FactCardProps = {
   fontSize: number;
   colors: ColorTheme;
 };
-
-// Type assertion to bypass incorrect official type definitions
-const TextWithSelection = Text as any;
 
 export function FactCard({
   factId,
@@ -64,7 +63,7 @@ export function FactCard({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handleTouchEnd = () => {
+  const handlePressOut = () => {
     if (selection && selection.start !== selection.end && content) {
       const selectedText = content.substring(selection.start, selection.end).trim();
       if (selectedText) {
@@ -73,7 +72,6 @@ export function FactCard({
         setIsDrawerOpen(true);
       }
     }
-    setSelection(undefined);
   };
 
   const handleCloseDrawer = () => {
@@ -122,6 +120,8 @@ export function FactCard({
     contentText: {
       color: colors.foreground,
       lineHeight: 26,
+      padding: 0,
+      margin: 0,
     },
     errorText: {
       color: colors.destructive,
@@ -168,13 +168,18 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
-            <TextWithSelection
-              selectable
-              onTouchEnd={handleTouchEnd}
-              onSelectionChange={handleSelectionChange}
-              style={[styles.contentText, { fontSize }]}>
-              {content}
-            </TextWithSelection>
+            <Pressable onPressOut={handlePressOut}>
+              <TextInput
+                value={content}
+                editable={false}
+                multiline
+                selectable
+                contextMenuHidden
+                onSelectionChange={handleSelectionChange}
+                style={[styles.contentText, { fontSize }]}
+                scrollEnabled={false}
+              />
+            </Pressable>
           )}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>

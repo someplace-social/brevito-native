@@ -10,10 +10,12 @@ import {
   Modal,
   NativeSyntheticEvent,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
@@ -31,9 +33,6 @@ type ExtendedFactSheetProps = {
   fontSize: number;
   colors: ColorTheme;
 };
-
-// Type assertion to bypass incorrect official type definitions
-const TextWithSelection = Text as any;
 
 export function ExtendedFactSheet({
   factId,
@@ -61,7 +60,7 @@ export function ExtendedFactSheet({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handleTouchEnd = () => {
+  const handlePressOut = () => {
     if (selection && selection.start !== selection.end && data?.content) {
       const selectedText = data.content.substring(selection.start, selection.end).trim();
       if (selectedText) {
@@ -70,7 +69,6 @@ export function ExtendedFactSheet({
         setIsDrawerOpen(true);
       }
     }
-    setSelection(undefined);
   };
 
   const handleCloseDrawer = () => {
@@ -133,6 +131,8 @@ export function ExtendedFactSheet({
     contentText: {
       color: colors.foreground,
       lineHeight: 28,
+      padding: 0,
+      margin: 0,
     },
     sourceButton: {
       flexDirection: 'row',
@@ -186,13 +186,18 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
-                  <TextWithSelection
-                    selectable
-                    onTouchEnd={handleTouchEnd}
-                    onSelectionChange={handleSelectionChange}
-                    style={[styles.contentText, { fontSize }]}>
-                    {data.content}
-                  </TextWithSelection>
+                  <Pressable onPressOut={handlePressOut}>
+                    <TextInput
+                      value={data.content}
+                      editable={false}
+                      multiline
+                      selectable
+                      contextMenuHidden
+                      onSelectionChange={handleSelectionChange}
+                      style={[styles.contentText, { fontSize }]}
+                      scrollEnabled={false}
+                    />
+                  </Pressable>
                 )}
                 {data.source && data.source_url && (
                   <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
