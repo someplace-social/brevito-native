@@ -1,3 +1,4 @@
+// v1.5: Use gemini-2.0-flash model as requested
 import { serve } from 'http';
 import { createClient } from 'supabase';
 
@@ -24,24 +25,25 @@ serve(async (req: Request) => {
 
   try {
     const { word, sourceLanguage, targetLanguage } = await req.json();
+    console.log(`Analyzing word: ${word} (${sourceLanguage} -> ${targetLanguage})`);
+    
+    if (!word || !sourceLanguage || !targetLanguage) {
+      throw new Error('Missing required parameters: word, sourceLanguage, or targetLanguage');
+    }
     const lowerCaseWord = word.toLowerCase();
 
-    // Use the Service Role Key to bypass RLS for database operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 1. Check if analysis already exists in our database (caching)
-    const { data: existingAnalysis, error: selectError } = await supabaseAdmin
+    const { data: existingAnalysis } = await supabaseAdmin
       .from('word_analysis')
       .select('analysis')
       .eq('word', lowerCaseWord)
       .eq('source_language', sourceLanguage)
       .eq('target_language', targetLanguage)
       .maybeSingle();
-
-    if (selectError) throw selectError;
 
     if (existingAnalysis) {
       return new Response(JSON.stringify(existingAnalysis.analysis), {
@@ -50,7 +52,6 @@ serve(async (req: Request) => {
       });
     }
 
-    // 2. If not found, call the Generative AI API
     const genAIKey = Deno.env.get('GEN_AI_KEY');
     if (!genAIKey) throw new Error('GEN_AI_KEY not found in secrets.');
 
@@ -74,7 +75,7 @@ serve(async (req: Request) => {
     `;
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${genAIKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genAIKey}`, // Using user-specified model
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,19 +85,23 @@ serve(async (req: Request) => {
       }
     );
 
+    const geminiData = await geminiResponse.json();
     if (!geminiResponse.ok) {
-      const errorBody = await geminiResponse.text();
-      throw new Error(`Gemini API request failed: ${errorBody}`);
+      const errorDetails = JSON.stringify(geminiData, null, 2);
+      console.error('Gemini API Error:', errorDetails);
+      throw new Error(`Gemini API request failed with status ${geminiResponse.status}. Details: ${errorDetails}`);
+    }
+    
+    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) {
+      const errorDetails = JSON.stringify(geminiData, null, 2);
+      console.error('Invalid response structure from Gemini API:', errorDetails);
+      throw new Error(`Invalid response structure from Gemini API. Full response: ${errorDetails}`);
     }
 
-    const geminiData = await geminiResponse.json();
-    const rawText = geminiData.candidates[0]?.content?.parts[0]?.text;
-    if (!rawText) throw new Error('Invalid response structure from Gemini API.');
+    const newAnalysis: WordAnalysis = JSON.parse(rawText.trim().replace(/```json|```/g, ''));
 
-    const newAnalysis: WordAnalysis = JSON.parse(rawText);
-
-    // 3. Store the new analysis in the database for next time
-    const { error: insertError } = await supabaseAdmin
+    await supabaseAdmin
       .from('word_analysis')
       .insert({
         word: lowerCaseWord,
@@ -104,11 +109,6 @@ serve(async (req: Request) => {
         target_language: targetLanguage,
         analysis: newAnalysis,
       });
-
-    if (insertError) {
-      // Log the error but don't block the user from getting the response
-      console.error('Failed to cache word analysis:', insertError.message);
-    }
 
     return new Response(JSON.stringify(newAnalysis), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ serve(async (req: Request) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
     console.error('Edge function error:', message);
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ error: `Function Error: ${message}` }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
