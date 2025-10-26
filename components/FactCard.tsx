@@ -254,4 +254,4 @@ export function FactCard({
       />
     </View>
   );
-}
+} 
