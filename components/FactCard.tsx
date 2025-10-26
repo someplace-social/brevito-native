@@ -1,13 +1,10 @@
 import { ColorTheme } from '@/constants/Colors';
-import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFactContent } from '@/hooks/useFactContent';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { TranslationPopover } from './TranslationPopover';
+import React, { useMemo, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
-import { SelectableText } from './ui/SelectableText';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type FactCardProps = {
@@ -26,12 +23,6 @@ type FactCardProps = {
   colors: ColorTheme;
 };
 
-type PopoverState = {
-  isVisible: boolean;
-  position: { top: number; left: number } | null;
-  selectedWord: string;
-};
-
 export function FactCard({
   factId,
   category,
@@ -47,13 +38,6 @@ export function FactCard({
   fontSize,
   colors,
 }: FactCardProps) {
-  const cardRef = useRef<View>(null);
-  const { theme } = useAppSettings();
-  const [popoverState, setPopoverState] = useState<PopoverState>({
-    isVisible: false,
-    position: null,
-    selectedWord: '',
-  });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [wordToAnalyze, setWordToAnalyze] = useState('');
 
@@ -64,31 +48,13 @@ export function FactCard({
     isIntersecting,
   });
 
-  const handleWordSelect = (word: string, wordRef: React.RefObject<View | null>) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    cardRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
-      wordRef.current?.measure((_wfx, _wfy, _wWidth, wHeight, wpx, wpy) => {
-        setPopoverState({
-          isVisible: true,
-          selectedWord: word,
-          position: {
-            top: wpy - py - wHeight - 10,
-            left: wpx - px,
-          },
-        });
-      });
-    });
-  };
-
-  const handleClosePopover = () => {
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
-  };
-
-  const handleLearnMore = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setWordToAnalyze(popoverState.selectedWord);
-    handleClosePopover();
-    setIsDrawerOpen(true);
+  const handleSelection = (event: { nativeEvent: { text: string } }) => {
+    const selectedText = event.nativeEvent.text.trim();
+    if (selectedText) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setWordToAnalyze(selectedText);
+      setIsDrawerOpen(true);
+    }
   };
 
   const handleCloseDrawer = () => {
@@ -110,21 +76,10 @@ export function FactCard({
     card: {
       backgroundColor: colors.card,
       borderRadius: 12,
-      borderWidth: theme === 'light' ? 0 : 1,
+      borderWidth: 1,
       borderColor: colors.border,
       overflow: 'hidden',
       minHeight: 100,
-      ...Platform.select({
-        ios: {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme === 'light' ? 0.1 : 0,
-          shadowRadius: 4,
-        },
-        android: {
-          elevation: theme === 'light' ? 4 : 0,
-        },
-      }),
     },
     image: {
       width: '100%',
@@ -156,6 +111,7 @@ export function FactCard({
     footerContainer: {
       paddingHorizontal: 16,
       paddingBottom: 12,
+      paddingTop: 4,
     },
     readMoreButton: {
       flexDirection: 'row',
@@ -166,23 +122,11 @@ export function FactCard({
       color: colors.mutedForeground,
       fontSize: 14,
     },
-  }), [colors, theme]);
+  }), [colors]);
 
   return (
-    <View ref={cardRef}>
-      <Pressable onPress={handleClosePopover} style={styles.card}>
-        {popoverState.isVisible && (
-          <TranslationPopover
-            isVisible={popoverState.isVisible}
-            position={popoverState.position}
-            selectedWord={popoverState.selectedWord}
-            contentLanguage={contentLanguage}
-            translationLanguage={translationLanguage}
-            context={content}
-            onLearnMore={handleLearnMore}
-            colors={colors}
-          />
-        )}
+    <View>
+      <View style={styles.card}>
         {showImages && imageUrl && (
           <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
         )}
@@ -205,11 +149,9 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
-            <SelectableText
-              text={content}
-              onWordSelect={handleWordSelect}
-              style={[styles.contentText, { fontSize }]}
-            />
+            <Text selectable onSelectionChange={handleSelection} style={[styles.contentText, { fontSize }]}>
+              {content}
+            </Text>
           )}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
@@ -218,13 +160,14 @@ export function FactCard({
             <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
           </View>
         </TouchableOpacity>
-      </Pressable>
+      </View>
       <WordAnalysisDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         selectedText={wordToAnalyze}
         sourceLanguage={contentLanguage}
         targetLanguage={translationLanguage}
+        context={content}
         colors={colors}
       />
     </View>

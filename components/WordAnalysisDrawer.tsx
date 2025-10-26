@@ -1,6 +1,7 @@
 import { ColorTheme } from '@/constants/Colors';
-import { MeaningAnalysis, useWordAnalysis } from '@/hooks/useWordAnalysis';
-import React, { useEffect, useMemo } from 'react';
+import { useWordAnalysis } from '@/hooks/useWordAnalysis';
+import { useWordTranslation } from '@/hooks/useWordTranslation';
+import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -22,6 +23,7 @@ type WordAnalysisDrawerProps = {
   selectedText: string;
   sourceLanguage: string;
   targetLanguage: string;
+  context: string | null;
   colors: ColorTheme;
 };
 
@@ -49,26 +51,31 @@ export function WordAnalysisDrawer({
   selectedText,
   sourceLanguage,
   targetLanguage,
+  context,
   colors,
 }: WordAnalysisDrawerProps) {
-  const { analysis, isLoading, error } = useWordAnalysis({
+  const {
+    translation,
+    isLoading: isTranslationLoading,
+    error: translationError,
+  } = useWordTranslation({
+    word: selectedText,
+    sourceLanguage,
+    targetLanguage,
+    context,
+    enabled: isOpen,
+  });
+
+  const {
+    analysis,
+    isLoading: isAnalysisLoading,
+    error: analysisError,
+  } = useWordAnalysis({
     word: selectedText,
     sourceLanguage,
     targetLanguage,
     enabled: isOpen,
   });
-
-  // --- DIAGNOSTIC LOGGING ---
-  useEffect(() => {
-    if (isOpen) {
-      console.log('--- Word Analysis Drawer ---');
-      console.log('Is Loading:', isLoading);
-      console.log('Error:', error);
-      console.log('Analysis Data:', JSON.stringify(analysis, null, 2));
-      console.log('--------------------------');
-    }
-  }, [isOpen, isLoading, error, analysis]);
-  // -------------------------
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -105,6 +112,8 @@ export function WordAnalysisDrawer({
       fontWeight: 'bold',
       color: colors.foreground,
       textTransform: 'capitalize',
+      textAlign: 'center',
+      marginHorizontal: 48,
     },
     scrollContent: {
       padding: 16,
@@ -112,7 +121,7 @@ export function WordAnalysisDrawer({
     analysisContainer: {
       gap: 32,
     },
-    rootWordContainer: {
+    translationContainer: {
       paddingBottom: 16,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
@@ -123,7 +132,17 @@ export function WordAnalysisDrawer({
       fontWeight: '600',
       textTransform: 'uppercase',
       letterSpacing: 0.5,
-      marginBottom: 4,
+      marginBottom: 8,
+    },
+    mainTranslationText: {
+      color: colors.primary,
+      fontSize: 28,
+      fontWeight: 'bold',
+    },
+    rootWordContainer: {
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
     rootWordText: {
       color: colors.foreground,
@@ -166,12 +185,13 @@ export function WordAnalysisDrawer({
     errorText: {
       color: colors.destructive,
       textAlign: 'center',
+      padding: 8,
     },
     centered: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-    }
+    },
   }), [colors]);
 
   return (
@@ -188,40 +208,46 @@ export function WordAnalysisDrawer({
             <TouchableOpacity onPress={onClose} style={styles.backButton}>
               <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
             </TouchableOpacity>
-            <Text style={styles.title}>{selectedText}</Text>
+            <Text style={styles.title} numberOfLines={1}>{selectedText}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <IconSymbol name="xmark" size={24} color={colors.foreground} />
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={styles.scrollContent}>
-            {isLoading && (
-              <View style={styles.centered}>
-                <ActivityIndicator size="large" color={colors.primary} />
+            <View style={styles.analysisContainer}>
+              <View style={styles.translationContainer}>
+                <Text style={styles.sectionTitle}>Translation</Text>
+                {isTranslationLoading && <ActivityIndicator color={colors.primary} />}
+                {translationError && <Text style={styles.errorText}>{translationError}</Text>}
+                {translation && <Text style={styles.mainTranslationText}>{translation}</Text>}
               </View>
-            )}
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            {analysis && (
-              <View style={styles.analysisContainer}>
-                {analysis.rootWord && selectedText.toLowerCase() !== analysis.rootWord.toLowerCase() && (
-                  <View style={styles.rootWordContainer}>
-                    <Text style={styles.sectionTitle}>ROOT</Text>
-                    <Text style={styles.rootWordText}>{analysis.rootWord}</Text>
-                  </View>
-                )}
-                {analysis.analysis?.map((item: MeaningAnalysis, index: number) => (
-                  <View key={index} style={styles.meaningBlock}>
-                    <Text style={styles.translationText}>{item.translation}</Text>
-                    <Text style={styles.posText}>{item.partOfSpeech}</Text>
-                    <View style={styles.exampleContainer}>
-                      <Text style={styles.exampleSentence}>
-                        <UnderlinedSentence sentence={item.exampleSentence} word={selectedText} style={styles.underline} />
-                      </Text>
-                      <Text style={styles.exampleTranslation}>{item.exampleTranslation}</Text>
+
+              {isAnalysisLoading && <ActivityIndicator color={colors.primary} />}
+              {analysisError && <Text style={styles.errorText}>{analysisError}</Text>}
+              {analysis && (
+                <>
+                  {analysis.rootWord && selectedText.toLowerCase() !== analysis.rootWord.toLowerCase() && (
+                    <View>
+                      <Text style={styles.sectionTitle}>ROOT</Text>
+                      <Text style={styles.rootWordText}>{analysis.rootWord}</Text>
                     </View>
-                  </View>
-                ))}
-              </View>
-            )}
+                  )}
+                  {analysis.analysis?.map((item, index) => (
+                    <View key={index} style={styles.meaningBlock}>
+                      <Text style={styles.sectionTitle}>{`Meaning ${index + 1}`}</Text>
+                      <Text style={styles.translationText}>{item.translation}</Text>
+                      <Text style={styles.posText}>{item.partOfSpeech}</Text>
+                      <View style={styles.exampleContainer}>
+                        <Text style={styles.exampleSentence}>
+                          <UnderlinedSentence sentence={item.exampleSentence} word={selectedText} style={styles.underline} />
+                        </Text>
+                        <Text style={styles.exampleTranslation}>{item.exampleTranslation}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </>
+              )}
+            </View>
           </ScrollView>
         </SafeAreaView>
       </View>

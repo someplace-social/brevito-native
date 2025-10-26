@@ -4,12 +4,11 @@ import { useExtendedFact } from '@/hooks/useExtendedFact';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
   Platform,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -17,9 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
-import { SelectableText } from './ui/SelectableText';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type ExtendedFactSheetProps = {
@@ -33,12 +30,6 @@ type ExtendedFactSheetProps = {
   colors: ColorTheme;
 };
 
-type PopoverState = {
-  isVisible: boolean;
-  position: { top: number; left: number } | null;
-  selectedWord: string;
-};
-
 export function ExtendedFactSheet({
   factId,
   isVisible,
@@ -49,14 +40,8 @@ export function ExtendedFactSheet({
   fontSize,
   colors,
 }: ExtendedFactSheetProps) {
-  const contentRef = useRef<View>(null);
   const { translationLanguage } = useAppSettings();
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
-  const [popoverState, setPopoverState] = useState<PopoverState>({
-    isVisible: false,
-    position: null,
-    selectedWord: '',
-  });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [wordToAnalyze, setWordToAnalyze] = useState('');
 
@@ -66,31 +51,13 @@ export function ExtendedFactSheet({
     }
   };
 
-  const handleWordSelect = (word: string, wordRef: React.RefObject<View | null>) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    contentRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
-      wordRef.current?.measure((_wfx, _wfy, _wWidth, wHeight, wpx, wpy) => {
-        setPopoverState({
-          isVisible: true,
-          selectedWord: word,
-          position: {
-            top: wpy - py - wHeight - 10,
-            left: wpx - px,
-          },
-        });
-      });
-    });
-  };
-
-  const handleClosePopover = () => {
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
-  };
-
-  const handleLearnMore = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setWordToAnalyze(popoverState.selectedWord);
-    handleClosePopover();
-    setIsDrawerOpen(true);
+  const handleSelection = (event: { nativeEvent: { text: string } }) => {
+    const selectedText = event.nativeEvent.text.trim();
+    if (selectedText) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setWordToAnalyze(selectedText);
+      setIsDrawerOpen(true);
+    }
   };
 
   const handleCloseDrawer = () => {
@@ -195,44 +162,28 @@ export function ExtendedFactSheet({
             {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {data && (
-              <Pressable onPress={handleClosePopover}>
-                <View style={styles.content} ref={contentRef}>
-                  {popoverState.isVisible && (
-                    <TranslationPopover
-                      isVisible={popoverState.isVisible}
-                      position={popoverState.position}
-                      selectedWord={popoverState.selectedWord}
-                      contentLanguage={language}
-                      translationLanguage={translationLanguage}
-                      context={data.content}
-                      onLearnMore={handleLearnMore}
-                      colors={colors}
-                    />
-                  )}
-                  {showImages && data.image_url && (
-                    <Image source={{ uri: data.image_url }} style={styles.image} />
-                  )}
-                  {data.category && (
-                    <Text style={styles.categoryText}>
-                      {data.category}
-                      {data.subcategory && ` > ${data.subcategory}`}
-                    </Text>
-                  )}
-                  {data.content && (
-                    <SelectableText
-                      text={data.content}
-                      onWordSelect={handleWordSelect}
-                      style={[styles.contentText, { fontSize }]}
-                    />
-                  )}
-                  {data.source && data.source_url && (
-                    <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
-                      <Text style={styles.sourceText}>Source: {data.source}</Text>
-                      <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </Pressable>
+              <View style={styles.content}>
+                {showImages && data.image_url && (
+                  <Image source={{ uri: data.image_url }} style={styles.image} />
+                )}
+                {data.category && (
+                  <Text style={styles.categoryText}>
+                    {data.category}
+                    {data.subcategory && ` > ${data.subcategory}`}
+                  </Text>
+                )}
+                {data.content && (
+                  <Text selectable onSelectionChange={handleSelection} style={[styles.contentText, { fontSize }]}>
+                    {data.content}
+                  </Text>
+                )}
+                {data.source && data.source_url && (
+                  <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
+                    <Text style={styles.sourceText}>Source: {data.source}</Text>
+                    <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
           </ScrollView>
         </SafeAreaView>
@@ -243,6 +194,7 @@ export function ExtendedFactSheet({
         selectedText={wordToAnalyze}
         sourceLanguage={language}
         targetLanguage={translationLanguage}
+        context={data?.content ?? null}
         colors={colors}
       />
     </Modal>
