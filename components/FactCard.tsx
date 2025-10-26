@@ -3,7 +3,16 @@ import { useFactContent } from '@/hooks/useFactContent';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  NativeSyntheticEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextSelectionChangeEventData,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
@@ -40,6 +49,7 @@ export function FactCard({
 }: FactCardProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [wordToAnalyze, setWordToAnalyze] = useState('');
+  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
 
   const { content, error, isLoading } = useFactContent({
     factId,
@@ -48,13 +58,20 @@ export function FactCard({
     isIntersecting,
   });
 
-  const handleSelection = (event: { nativeEvent: { text: string } }) => {
-    const selectedText = event.nativeEvent.text.trim();
-    if (selectedText) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setWordToAnalyze(selectedText);
-      setIsDrawerOpen(true);
+  const handleSelectionChange = (event: NativeSyntheticEvent<TextSelectionChangeEventData>) => {
+    setSelection(event.nativeEvent.selection);
+  };
+
+  const handlePressOut = () => {
+    if (selection && selection.start !== selection.end && content) {
+      const selectedText = content.substring(selection.start, selection.end).trim();
+      if (selectedText) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        setWordToAnalyze(selectedText);
+        setIsDrawerOpen(true);
+      }
     }
+    setSelection(undefined);
   };
 
   const handleCloseDrawer = () => {
@@ -149,10 +166,14 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
-            // @ts-ignore - onSelectionChange is a valid prop but may not be in the type definitions
-            <Text selectable onSelectionChange={handleSelection} style={[styles.contentText, { fontSize }]}>
-              {content}
-            </Text>
+            <Pressable onPressOut={handlePressOut}>
+              <Text
+                selectable
+                onSelectionChange={handleSelectionChange}
+                style={[styles.contentText, { fontSize }]}>
+                {content}
+              </Text>
+            </Pressable>
           )}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>

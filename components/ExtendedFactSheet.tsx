@@ -8,11 +8,14 @@ import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
+  NativeSyntheticEvent,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -44,6 +47,7 @@ export function ExtendedFactSheet({
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [wordToAnalyze, setWordToAnalyze] = useState('');
+  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
 
   const handleOpenSource = () => {
     if (data?.source_url) {
@@ -51,13 +55,20 @@ export function ExtendedFactSheet({
     }
   };
 
-  const handleSelection = (event: { nativeEvent: { text: string } }) => {
-    const selectedText = event.nativeEvent.text.trim();
-    if (selectedText) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      setWordToAnalyze(selectedText);
-      setIsDrawerOpen(true);
+  const handleSelectionChange = (event: NativeSyntheticEvent<TextSelectionChangeEventData>) => {
+    setSelection(event.nativeEvent.selection);
+  };
+
+  const handlePressOut = () => {
+    if (selection && selection.start !== selection.end && data?.content) {
+      const selectedText = data.content.substring(selection.start, selection.end).trim();
+      if (selectedText) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        setWordToAnalyze(selectedText);
+        setIsDrawerOpen(true);
+      }
     }
+    setSelection(undefined);
   };
 
   const handleCloseDrawer = () => {
@@ -173,10 +184,14 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
-                  // @ts-ignore - onSelectionChange is a valid prop but may not be in the type definitions
-                  <Text selectable onSelectionChange={handleSelection} style={[styles.contentText, { fontSize }]}>
-                    {data.content}
-                  </Text>
+                  <Pressable onPressOut={handlePressOut}>
+                    <Text
+                      selectable
+                      onSelectionChange={handleSelectionChange}
+                      style={[styles.contentText, { fontSize }]}>
+                      {data.content}
+                    </Text>
+                  </Pressable>
                 )}
                 {data.source && data.source_url && (
                   <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
