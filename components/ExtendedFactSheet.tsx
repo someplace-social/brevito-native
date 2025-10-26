@@ -7,7 +7,6 @@ import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Modal,
   NativeSyntheticEvent,
   Platform,
@@ -19,7 +18,7 @@ import {
   TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
@@ -83,7 +82,6 @@ export function ExtendedFactSheet({
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         sheetRef.current?.measure((_fx, _fy, width, _height, px, py) => {
-          const { width: screenWidth } = Dimensions.get('window');
           const popoverWidth = 200;
           const popoverHeight = 60;
 
@@ -206,7 +204,7 @@ export function ExtendedFactSheet({
     style: [styles.contentText, { fontSize }],
     scrollEnabled: false,
     contextMenuHidden: true,
-    editable: Platform.OS === 'android',
+    editable: Platform.OS === 'android' && !popoverState.isVisible,
     showSoftInputOnFocus: false,
     selectable: true,
     caretHidden: true,

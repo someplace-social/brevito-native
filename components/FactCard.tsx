@@ -5,7 +5,6 @@ import { Image } from 'expo-image';
 import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   NativeSyntheticEvent,
   Platform,
   Pressable,
@@ -14,7 +13,7 @@ import {
   TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
@@ -87,7 +86,6 @@ export function FactCard({
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         cardRef.current?.measure((_fx, _fy, width, _height, px, py) => {
-          const { width: screenWidth } = Dimensions.get('window');
           const popoverWidth = 200;
           const popoverHeight = 60;
 
@@ -198,7 +196,7 @@ export function FactCard({
     style: [styles.contentText, { fontSize }],
     scrollEnabled: false,
     contextMenuHidden: true,
-    editable: Platform.OS === 'android',
+    editable: Platform.OS === 'android' && !popoverState.isVisible,
     showSoftInputOnFocus: false,
     selectable: true,
     caretHidden: true,
