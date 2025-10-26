@@ -1,4 +1,4 @@
-// v1.5: Use gemini-2.0-flash model as requested
+// v1.6: Correct Gemini model name for analysis
 import { serve } from 'http';
 import { createClient } from 'supabase';
 
@@ -75,7 +75,7 @@ serve(async (req: Request) => {
     `;
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genAIKey}`, // Using user-specified model
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${genAIKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
