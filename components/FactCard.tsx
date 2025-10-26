@@ -6,17 +6,16 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
+import { SelectableText } from './ui/SelectableText';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type FactCardProps = {
@@ -58,7 +57,7 @@ export function FactCard({
 }: FactCardProps) {
   const cardRef = useRef<View>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const lastValidSelection = useRef<{ start: number; end: number } | undefined>();
+  const lastValidSelection = useRef<{ start: number; end: number } | undefined>(undefined);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
     position: null,
@@ -204,19 +203,11 @@ export function FactCard({
             {isLoading && <ActivityIndicator color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {content && (
-              <TextInput
-                // @ts-ignore
+              <SelectableText
                 value={content}
-                multiline
                 onSelectionChange={handleSelectionChange}
                 onPressOut={handlePressOut}
                 style={[styles.contentText, { fontSize }]}
-                scrollEnabled={false}
-                contextMenuHidden
-                editable={Platform.OS !== 'ios'}
-                selectable
-                caretHidden={Platform.OS !== 'ios'}
-                showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
               />
             )}
           </View>

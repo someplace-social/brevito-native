@@ -15,13 +15,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
+import { SelectableText } from './ui/SelectableText';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
 type ExtendedFactSheetProps = {
@@ -55,7 +55,7 @@ export function ExtendedFactSheet({
   const { translationLanguage } = useAppSettings();
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const lastValidSelection = useRef<{ start: number; end: number } | undefined>();
+  const lastValidSelection = useRef<{ start: number; end: number } | undefined>(undefined);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
     position: null,
@@ -221,19 +221,11 @@ export function ExtendedFactSheet({
                     </Text>
                   )}
                   {data.content && (
-                    <TextInput
-                      // @ts-ignore
+                    <SelectableText
                       value={data.content}
-                      multiline
                       onSelectionChange={handleSelectionChange}
                       onPressOut={handlePressOut}
                       style={[styles.contentText, { fontSize }]}
-                      scrollEnabled={false}
-                      contextMenuHidden
-                      editable={Platform.OS !== 'ios'}
-                      selectable
-                      caretHidden={Platform.OS !== 'ios'}
-                      showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
                     />
                   )}
                   {data.source && data.source_url && (
