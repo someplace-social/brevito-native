@@ -219,6 +219,7 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
+                  // @ts-ignore - `selectable` prop is valid but causes a type error.
                   <TextInput
                     value={data.content}
                     multiline
@@ -227,7 +228,8 @@ export function ExtendedFactSheet({
                     style={[styles.contentText, { fontSize }]}
                     scrollEnabled={false}
                     contextMenuHidden
-                    editable={false}
+                    editable={Platform.OS === 'android'}
+                    showSoftInputOnFocus={false}
                     selectable
                     caretHidden
                   />

@@ -6,6 +6,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -201,6 +202,7 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
+            // @ts-ignore - `selectable` prop is valid but causes a type error.
             <TextInput
               value={content}
               multiline
@@ -209,7 +211,8 @@ export function FactCard({
               style={[styles.contentText, { fontSize }]}
               scrollEnabled={false}
               contextMenuHidden
-              editable={false}
+              editable={Platform.OS === 'android'}
+              showSoftInputOnFocus={false}
               selectable
               caretHidden
             />
