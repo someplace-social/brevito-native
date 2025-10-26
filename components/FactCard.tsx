@@ -111,8 +111,8 @@ export function FactCard({
 
   const handleLearnMore = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    handleClosePopover();
     setIsDrawerOpen(true);
+    handleClosePopover();
   };
 
   const handleCloseDrawer = () => {

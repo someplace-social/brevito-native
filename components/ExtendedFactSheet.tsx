@@ -107,8 +107,8 @@ export function ExtendedFactSheet({
 
   const handleLearnMore = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    handleClosePopover();
     setIsDrawerOpen(true);
+    handleClosePopover();
   };
 
   const handleCloseDrawer = () => {
