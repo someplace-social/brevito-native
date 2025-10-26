@@ -1,8 +1,8 @@
-import { Colors } from '@/constants/Colors';
+import { ColorTheme } from '@/constants/Colors';
 import { useFactContent } from '@/hooks/useFactContent';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
@@ -22,6 +22,7 @@ type FactCardProps = {
   onReadMore: (factId: string) => void;
   onCategoryFilter: (category: string) => void;
   fontSize: number;
+  colors: ColorTheme;
 };
 
 type PopoverState = {
@@ -43,6 +44,7 @@ export function FactCard({
   onReadMore,
   onCategoryFilter,
   fontSize,
+  colors,
 }: FactCardProps) {
   const cardRef = useRef<View>(null);
   const [popoverState, setPopoverState] = useState<PopoverState>({
@@ -95,6 +97,57 @@ export function FactCard({
     onReadMore(factId);
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: 'hidden',
+      minHeight: 100,
+    },
+    image: {
+      width: '100%',
+      aspectRatio: 16 / 9,
+    },
+    contentContainer: {
+      padding: 16,
+      gap: 12,
+    },
+    categoryContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    categoryText: {
+      color: colors.mutedForeground,
+      fontSize: 14,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    contentText: {
+      color: colors.foreground,
+      lineHeight: 26,
+    },
+    errorText: {
+      color: colors.destructive,
+      fontSize: 16,
+    },
+    footerContainer: {
+      paddingHorizontal: 16,
+      paddingBottom: 12,
+    },
+    readMoreButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    readMoreText: {
+      color: colors.mutedForeground,
+      fontSize: 14,
+    },
+  }), [colors]);
+
   return (
     <View ref={cardRef}>
       <Pressable onPress={handleClosePopover} style={styles.card}>
@@ -107,6 +160,7 @@ export function FactCard({
             translationLanguage={translationLanguage}
             context={content}
             onLearnMore={handleLearnMore}
+            colors={colors}
           />
         )}
         {showImages && imageUrl && (
@@ -128,7 +182,7 @@ export function FactCard({
               )}
             </View>
           )}
-          {isLoading && <ActivityIndicator color={Colors.dark.primary} />}
+          {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
             <SelectableText
@@ -141,7 +195,7 @@ export function FactCard({
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
           <View style={styles.readMoreButton}>
             <Text style={styles.readMoreText}>Read More</Text>
-            <IconSymbol name="arrow.up.right" size={12} color={Colors.dark.mutedForeground} />
+            <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
           </View>
         </TouchableOpacity>
       </Pressable>
@@ -151,58 +205,8 @@ export function FactCard({
         selectedText={popoverState.selectedWord}
         sourceLanguage={contentLanguage}
         targetLanguage={translationLanguage}
+        colors={colors}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    overflow: 'hidden',
-    minHeight: 100,
-  },
-  image: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-  },
-  contentContainer: {
-    padding: 16,
-    gap: 12,
-  },
-  categoryContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryText: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  contentText: {
-    color: Colors.dark.foreground,
-    lineHeight: 26,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-  },
-  footerContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  readMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  readMoreText: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 14,
-  },
-});

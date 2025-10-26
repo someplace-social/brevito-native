@@ -1,6 +1,6 @@
-import { Colors } from '@/constants/Colors';
+import { ColorTheme } from '@/constants/Colors';
 import { useWordAnalysis } from '@/hooks/useWordAnalysis';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     ActivityIndicator,
     Modal,
@@ -19,16 +19,17 @@ type WordAnalysisDrawerProps = {
   selectedText: string;
   sourceLanguage: string;
   targetLanguage: string;
+  colors: ColorTheme;
 };
 
-const UnderlinedSentence = ({ sentence, word }: { sentence: string; word: string }) => {
+const UnderlinedSentence = ({ sentence, word, style }: { sentence: string; word: string; style: any }) => {
   if (!word || !sentence) return <Text>{sentence}</Text>;
   const parts = sentence.split(new RegExp(`(${word})`, 'gi'));
   return (
     <Text>
       {parts.map((part, index) =>
         part.toLowerCase() === word.toLowerCase() ? (
-          <Text key={index} style={styles.underline}>
+          <Text key={index} style={style}>
             {part}
           </Text>
         ) : (
@@ -45,6 +46,7 @@ export function WordAnalysisDrawer({
   selectedText,
   sourceLanguage,
   targetLanguage,
+  colors,
 }: WordAnalysisDrawerProps) {
   const { analysis, isLoading, error } = useWordAnalysis({
     word: selectedText,
@@ -53,6 +55,100 @@ export function WordAnalysisDrawer({
     enabled: isOpen,
   });
 
+  const styles = useMemo(() => StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    safeArea: {
+      height: '90%',
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 12,
+      borderTopRightRadius: 12,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.foreground,
+      textTransform: 'capitalize',
+    },
+    closeButton: {
+      position: 'absolute',
+      right: 16,
+      top: 16,
+    },
+    scrollContent: {
+      padding: 16,
+    },
+    analysisContainer: {
+      gap: 32,
+    },
+    rootWordContainer: {
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    sectionTitle: {
+      color: colors.mutedForeground,
+      fontSize: 12,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 4,
+    },
+    rootWordText: {
+      color: colors.foreground,
+      fontSize: 18,
+      fontStyle: 'italic',
+    },
+    meaningBlock: {
+      gap: 8,
+    },
+    translationText: {
+      color: colors.foreground,
+      fontSize: 22,
+      fontWeight: 'bold',
+    },
+    posText: {
+      color: colors.mutedForeground,
+      fontSize: 14,
+      fontStyle: 'italic',
+      textTransform: 'capitalize',
+    },
+    exampleContainer: {
+      marginTop: 8,
+      paddingLeft: 12,
+      borderLeftWidth: 2,
+      borderLeftColor: colors.primary,
+      gap: 4,
+    },
+    exampleSentence: {
+      color: colors.foreground,
+      fontSize: 16,
+      fontStyle: 'italic',
+    },
+    exampleTranslation: {
+      color: colors.mutedForeground,
+      fontSize: 16,
+    },
+    underline: {
+      textDecorationLine: 'underline',
+    },
+    errorText: {
+      color: colors.destructive,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   return (
     <Modal animationType="slide" transparent={true} visible={isOpen} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -60,11 +156,11 @@ export function WordAnalysisDrawer({
           <View style={styles.header}>
             <Text style={styles.title}>{selectedText}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <IconSymbol name="xmark" size={20} color={Colors.dark.mutedForeground} />
+              <IconSymbol name="xmark" size={20} color={colors.mutedForeground} />
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={styles.scrollContent}>
-            {isLoading && <ActivityIndicator size="large" color={Colors.dark.primary} />}
+            {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {analysis && (
               <View style={styles.analysisContainer}>
@@ -80,7 +176,7 @@ export function WordAnalysisDrawer({
                     <Text style={styles.posText}>{item.partOfSpeech}</Text>
                     <View style={styles.exampleContainer}>
                       <Text style={styles.exampleSentence}>
-                        <UnderlinedSentence sentence={item.exampleSentence} word={selectedText} />
+                        <UnderlinedSentence sentence={item.exampleSentence} word={selectedText} style={styles.underline} />
                       </Text>
                       <Text style={styles.exampleTranslation}>{item.exampleTranslation}</Text>
                     </View>
@@ -94,97 +190,3 @@ export function WordAnalysisDrawer({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  safeArea: {
-    height: '90%',
-    backgroundColor: Colors.dark.background,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.dark.foreground,
-    textTransform: 'capitalize',
-  },
-  closeButton: {
-    position: 'absolute',
-    right: 16,
-    top: 16,
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  analysisContainer: {
-    gap: 32,
-  },
-  rootWordContainer: {
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-  },
-  sectionTitle: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  rootWordText: {
-    color: Colors.dark.foreground,
-    fontSize: 18,
-    fontStyle: 'italic',
-  },
-  meaningBlock: {
-    gap: 8,
-  },
-  translationText: {
-    color: Colors.dark.foreground,
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  posText: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 14,
-    fontStyle: 'italic',
-    textTransform: 'capitalize',
-  },
-  exampleContainer: {
-    marginTop: 8,
-    paddingLeft: 12,
-    borderLeftWidth: 2,
-    borderLeftColor: Colors.dark.primary,
-    gap: 4,
-  },
-  exampleSentence: {
-    color: Colors.dark.foreground,
-    fontSize: 16,
-    fontStyle: 'italic',
-  },
-  exampleTranslation: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 16,
-  },
-  underline: {
-    textDecorationLine: 'underline',
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-  },
-});

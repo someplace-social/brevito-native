@@ -1,7 +1,8 @@
-import { Colors } from '@/constants/Colors';
+import { ColorTheme } from '@/constants/Colors';
 import { useExtendedFact } from '@/hooks/useExtendedFact';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
+import { useMemo } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -22,6 +23,7 @@ type ExtendedFactSheetProps = {
   level: string;
   showImages: boolean;
   fontSize: number;
+  colors: ColorTheme;
 };
 
 export function ExtendedFactSheet({
@@ -32,6 +34,7 @@ export function ExtendedFactSheet({
   level,
   showImages,
   fontSize,
+  colors,
 }: ExtendedFactSheetProps) {
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
 
@@ -41,17 +44,80 @@ export function ExtendedFactSheet({
     }
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    closeButton: {
+      position: 'absolute',
+      left: 16,
+      top: 16,
+      zIndex: 1,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.foreground,
+    },
+    scrollContent: {
+      padding: 16,
+    },
+    content: {
+      gap: 24,
+    },
+    image: {
+      width: '100%',
+      aspectRatio: 16 / 9,
+      borderRadius: 12,
+    },
+    categoryText: {
+      color: colors.mutedForeground,
+      fontSize: 14,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+    },
+    contentText: {
+      color: colors.foreground,
+      lineHeight: 28,
+    },
+    sourceButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    sourceText: {
+      color: colors.mutedForeground,
+      fontSize: 14,
+    },
+    errorText: {
+      color: colors.destructive,
+      textAlign: 'center',
+    },
+  }), [colors]);
+
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <IconSymbol name="arrow.left" size={24} color={Colors.dark.foreground} />
+            <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
           </TouchableOpacity>
           <Text style={styles.title}>Details</Text>
         </View>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {isLoading && <ActivityIndicator size="large" color={Colors.dark.primary} />}
+          {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {data && (
             <View style={styles.content}>
@@ -68,7 +134,7 @@ export function ExtendedFactSheet({
               {data.source && data.source_url && (
                 <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
                   <Text style={styles.sourceText}>Source: {data.source}</Text>
-                  <IconSymbol name="arrow.up.right" size={14} color={Colors.dark.mutedForeground} />
+                  <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
                 </TouchableOpacity>
               )}
             </View>
@@ -78,66 +144,3 @@ export function ExtendedFactSheet({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-  },
-  closeButton: {
-    position: 'absolute',
-    left: 16,
-    top: 16,
-    zIndex: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.dark.foreground,
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  content: {
-    gap: 24,
-  },
-  image: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    borderRadius: 12,
-  },
-  categoryText: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  contentText: {
-    color: Colors.dark.foreground,
-    lineHeight: 28,
-  },
-  sourceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
-  },
-  sourceText: {
-    color: Colors.dark.mutedForeground,
-    fontSize: 14,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-  },
-});
