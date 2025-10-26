@@ -4,6 +4,8 @@ import React, { useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   Modal,
+  Platform,
+  SafeAreaView,
   ScrollView,
   StyleProp,
   StyleSheet,
@@ -12,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from './ui/icon-symbol';
 
 type WordAnalysisDrawerProps = {
@@ -56,7 +57,6 @@ export function WordAnalysisDrawer({
     targetLanguage,
     enabled: isOpen,
   });
-  const insets = useSafeAreaInsets();
 
   // --- DIAGNOSTIC LOGGING ---
   useEffect(() => {
@@ -71,35 +71,40 @@ export function WordAnalysisDrawer({
   // -------------------------
 
   const styles = useMemo(() => StyleSheet.create({
-    modalOverlay: {
+    container: {
       flex: 1,
-      justifyContent: 'flex-end',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    drawerContainer: {
-      height: '90%',
       backgroundColor: colors.background,
-      borderTopLeftRadius: 12,
-      borderTopRightRadius: 12,
+    },
+    safeArea: {
+      flex: 1,
     },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 16,
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+      paddingTop: Platform.OS === 'android' ? 64 : 48,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: colors.foreground,
-      textTransform: 'capitalize',
+    backButton: {
+      position: 'absolute',
+      left: 16,
+      top: Platform.OS === 'android' ? 64 : 48,
+      zIndex: 1,
     },
     closeButton: {
       position: 'absolute',
       right: 16,
-      top: 16,
+      top: Platform.OS === 'android' ? 64 : 48,
+      zIndex: 1,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.foreground,
+      textTransform: 'capitalize',
     },
     scrollContent: {
       padding: 16,
@@ -170,16 +175,25 @@ export function WordAnalysisDrawer({
   }), [colors]);
 
   return (
-    <Modal animationType="slide" transparent visible={isOpen} onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.drawerContainer}>
+    <Modal
+      animationType="slide"
+      transparent={false}
+      visible={isOpen}
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
           <View style={styles.header}>
+            <TouchableOpacity onPress={onClose} style={styles.backButton}>
+              <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
+            </TouchableOpacity>
             <Text style={styles.title}>{selectedText}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <IconSymbol name="xmark" size={20} color={colors.mutedForeground} />
+              <IconSymbol name="xmark" size={24} color={colors.foreground} />
             </TouchableOpacity>
           </View>
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
             {isLoading && (
               <View style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
@@ -209,8 +223,7 @@ export function WordAnalysisDrawer({
               </View>
             )}
           </ScrollView>
-          <View style={{ height: insets.bottom }} />
-        </View>
+        </SafeAreaView>
       </View>
     </Modal>
   );
