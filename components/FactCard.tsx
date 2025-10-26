@@ -55,6 +55,7 @@ export function FactCard({
     selectedWord: '',
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [wordToAnalyze, setWordToAnalyze] = useState('');
 
   const { content, error, isLoading } = useFactContent({
     factId,
@@ -85,8 +86,14 @@ export function FactCard({
 
   const handleLearnMore = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setWordToAnalyze(popoverState.selectedWord);
     handleClosePopover();
     setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setWordToAnalyze('');
   };
 
   const handleCategoryPress = (cat: string) => {
@@ -214,8 +221,8 @@ export function FactCard({
       </Pressable>
       <WordAnalysisDrawer
         isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        selectedText={popoverState.selectedWord}
+        onClose={handleCloseDrawer}
+        selectedText={wordToAnalyze}
         sourceLanguage={contentLanguage}
         targetLanguage={translationLanguage}
         colors={colors}
