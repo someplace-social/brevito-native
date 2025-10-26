@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import {
   ActivityIndicator,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -56,20 +57,22 @@ export function ExtendedFactSheet({
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 16,
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+      paddingTop: Platform.OS === 'android' ? 64 : 48,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
     backButton: {
       position: 'absolute',
       left: 16,
-      top: 16,
+      top: Platform.OS === 'android' ? 64 : 48,
       zIndex: 1,
     },
     closeButton: {
       position: 'absolute',
       right: 16,
-      top: 16,
+      top: Platform.OS === 'android' ? 64 : 48,
       zIndex: 1,
     },
     title: {
@@ -117,7 +120,13 @@ export function ExtendedFactSheet({
   }), [colors]);
 
   return (
-    <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent={false}
+      visible={isVisible}
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
       <View style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.header}>
