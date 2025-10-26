@@ -6,7 +6,6 @@ import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -32,6 +31,9 @@ type FactCardProps = {
   fontSize: number;
   colors: ColorTheme;
 };
+
+// Type assertion to bypass incorrect official type definitions
+const SelectableInput = TextInput as any;
 
 export function FactCard({
   factId,
@@ -63,7 +65,7 @@ export function FactCard({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handlePressOut = () => {
+  const handleTouchEnd = () => {
     if (selection && selection.start !== selection.end && content) {
       const selectedText = content.substring(selection.start, selection.end).trim();
       if (selectedText) {
@@ -168,19 +170,18 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
-            <Pressable onPressOut={handlePressOut}>
-              <TextInput
-                value={content}
-                editable // Must be true for selection to work reliably
-                onChangeText={() => {}} // Prevent actual edits
-                multiline
-                selectable
-                contextMenuHidden
-                onSelectionChange={handleSelectionChange}
-                style={[styles.contentText, { fontSize }]}
-                scrollEnabled={false}
-              />
-            </Pressable>
+            <SelectableInput
+              value={content}
+              editable
+              onChangeText={() => {}}
+              multiline
+              selectable
+              contextMenuHidden
+              onSelectionChange={handleSelectionChange}
+              onTouchEnd={handleTouchEnd}
+              style={[styles.contentText, { fontSize }]}
+              scrollEnabled={false}
+            />
           )}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>

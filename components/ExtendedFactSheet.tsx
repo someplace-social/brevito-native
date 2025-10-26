@@ -10,7 +10,6 @@ import {
   Modal,
   NativeSyntheticEvent,
   Platform,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -33,6 +32,9 @@ type ExtendedFactSheetProps = {
   fontSize: number;
   colors: ColorTheme;
 };
+
+// Type assertion to bypass incorrect official type definitions
+const SelectableInput = TextInput as any;
 
 export function ExtendedFactSheet({
   factId,
@@ -60,7 +62,7 @@ export function ExtendedFactSheet({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handlePressOut = () => {
+  const handleTouchEnd = () => {
     if (selection && selection.start !== selection.end && data?.content) {
       const selectedText = data.content.substring(selection.start, selection.end).trim();
       if (selectedText) {
@@ -186,19 +188,18 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
-                  <Pressable onPressOut={handlePressOut}>
-                    <TextInput
-                      value={data.content}
-                      editable // Must be true for selection to work reliably
-                      onChangeText={() => {}} // Prevent actual edits
-                      multiline
-                      selectable
-                      contextMenuHidden
-                      onSelectionChange={handleSelectionChange}
-                      style={[styles.contentText, { fontSize }]}
-                      scrollEnabled={false}
-                    />
-                  </Pressable>
+                  <SelectableInput
+                    value={data.content}
+                    editable
+                    onChangeText={() => {}}
+                    multiline
+                    selectable
+                    contextMenuHidden
+                    onSelectionChange={handleSelectionChange}
+                    onTouchEnd={handleTouchEnd}
+                    style={[styles.contentText, { fontSize }]}
+                    scrollEnabled={false}
+                  />
                 )}
                 {data.source && data.source_url && (
                   <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
