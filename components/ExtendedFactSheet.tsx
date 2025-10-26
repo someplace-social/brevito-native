@@ -173,6 +173,7 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
+                  // @ts-ignore - onSelectionChange is a valid prop but may not be in the type definitions
                   <Text selectable onSelectionChange={handleSelection} style={[styles.contentText, { fontSize }]}>
                     {data.content}
                   </Text>

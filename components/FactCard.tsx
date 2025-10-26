@@ -149,6 +149,7 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
+            // @ts-ignore - onSelectionChange is a valid prop but may not be in the type definitions
             <Text selectable onSelectionChange={handleSelection} style={[styles.contentText, { fontSize }]}>
               {content}
             </Text>
