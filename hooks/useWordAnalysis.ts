@@ -45,12 +45,16 @@ export function useWordAnalysis({
         });
 
         if (invokeError) throw invokeError;
-        
+
         if (data.error) {
           throw new Error(data.error);
         }
 
-        setAnalysis(data as WordAnalysisData);
+        if (data && Array.isArray(data.analysis) && data.analysis.length > 0) {
+          setAnalysis(data as WordAnalysisData);
+        } else {
+          throw new Error("Sorry, we couldn't find a detailed analysis for this word.");
+        }
       } catch (err: any) {
         setError(err.message || 'An error occurred fetching analysis.');
       } finally {
