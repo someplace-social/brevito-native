@@ -1,5 +1,5 @@
-import { Colors } from '@/constants/Colors';
-import React from 'react';
+import { useAppSettings } from '@/hooks/useAppSettings';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, TextStyle, ViewStyle } from 'react-native';
 
 type ToggleProps = {
@@ -12,6 +12,36 @@ type ToggleProps = {
 };
 
 export function Toggle({ children, pressed, onPressedChange, disabled, style, textStyle }: ToggleProps) {
+  const { colors } = useAppSettings();
+
+  const styles = useMemo(() => StyleSheet.create({
+    toggle: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: 'transparent',
+    },
+    togglePressed: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    toggleIsPressed: {
+      opacity: 0.7,
+    },
+    toggleDisabled: {
+      opacity: 0.5,
+    },
+    text: {
+      color: colors.foreground,
+      fontSize: 16,
+    },
+    textPressed: {
+      color: colors.primaryForeground,
+    },
+  }), [colors]);
+
   return (
     <Pressable
       onPress={() => onPressedChange(!pressed)}
@@ -27,30 +57,3 @@ export function Toggle({ children, pressed, onPressedChange, disabled, style, te
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  toggle: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    backgroundColor: 'transparent',
-  },
-  togglePressed: {
-    backgroundColor: Colors.dark.accent,
-  },
-  toggleIsPressed: {
-    opacity: 0.7,
-  },
-  toggleDisabled: {
-    opacity: 0.5,
-  },
-  text: {
-    color: Colors.dark.foreground,
-    fontSize: 16,
-  },
-  textPressed: {
-    color: Colors.dark.accentForeground,
-  },
-});

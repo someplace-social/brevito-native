@@ -1,4 +1,5 @@
-import { Colors } from '@/constants/Colors';
+import { useAppSettings } from '@/hooks/useAppSettings';
+import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type FontSizeStepperProps = {
@@ -8,19 +9,62 @@ type FontSizeStepperProps = {
 };
 
 export function FontSizeStepper({ currentSize, onSizeChange, sizeOptions }: FontSizeStepperProps) {
+  const { colors } = useAppSettings();
   const currentIndex = sizeOptions.indexOf(currentSize);
 
-  const handleDecrement = () => {
-    if (currentIndex > 0) {
-      onSizeChange(sizeOptions[currentIndex - 1]);
-    }
-  };
-
-  const handleIncrement = () => {
-    if (currentIndex < sizeOptions.length - 1) {
-      onSizeChange(sizeOptions[currentIndex + 1]);
-    }
-  };
+  const styles = useMemo(() => StyleSheet.create({
+    wrapper: {
+      gap: 8,
+    },
+    label: {
+      color: colors.foreground,
+      fontSize: 16,
+    },
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    smallA: {
+      color: colors.foreground,
+      fontSize: 14,
+    },
+    largeA: {
+      color: colors.foreground,
+      fontSize: 20,
+    },
+    track: {
+      flex: 1,
+      height: 4,
+      backgroundColor: colors.secondary,
+      borderRadius: 2,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    progress: {
+      position: 'absolute',
+      height: 4,
+      backgroundColor: colors.primary,
+      borderRadius: 2,
+    },
+    step: {
+      width: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    dot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: colors.secondary,
+      zIndex: 1,
+    },
+    activeDot: {
+      backgroundColor: colors.primary,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.wrapper}>
@@ -49,57 +93,3 @@ export function FontSizeStepper({ currentSize, onSizeChange, sizeOptions }: Font
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    gap: 8,
-  },
-  label: {
-    color: Colors.dark.foreground,
-    fontSize: 16,
-  },
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  smallA: {
-    color: Colors.dark.foreground,
-    fontSize: 14,
-  },
-  largeA: {
-    color: Colors.dark.foreground,
-    fontSize: 20,
-  },
-  track: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.dark.secondary,
-    borderRadius: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  progress: {
-    position: 'absolute',
-    height: 4,
-    backgroundColor: Colors.dark.primary,
-    borderRadius: 2,
-  },
-  step: {
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: Colors.dark.secondary,
-    zIndex: 1,
-  },
-  activeDot: {
-    backgroundColor: Colors.dark.primary,
-  },
-});
