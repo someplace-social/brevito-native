@@ -1,3 +1,4 @@
+import { Colors, ThemeName } from '@/constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 
@@ -11,6 +12,7 @@ export function useAppSettings() {
   const [fontSize, setFontSize] = useState<number>(18);
   const [selectedCategories, setSelectedCategories] = useState(AVAILABLE_CATEGORIES);
   const [showImages, setShowImages] = useState(true);
+  const [theme, setTheme] = useState<ThemeName>('dark');
   
   const [isInitialized, setIsInitialized] = useState(false);
   const [settingsKey, setSettingsKey] = useState(0);
@@ -25,6 +27,7 @@ export function useAppSettings() {
           "brevito-font-size",
           "brevito-categories",
           "brevito-show-images",
+          "brevito-theme",
         ]);
 
         const settingsMap = new Map(settings);
@@ -44,6 +47,9 @@ export function useAppSettings() {
 
         const savedShowImages = settingsMap.get("brevito-show-images");
         if (savedShowImages) setShowImages(JSON.parse(savedShowImages));
+
+        const savedTheme = settingsMap.get("brevito-theme") as ThemeName;
+        if (savedTheme && Colors[savedTheme]) setTheme(savedTheme);
 
       } catch (error) {
         console.error("Failed to load settings from storage", error);
@@ -67,6 +73,7 @@ export function useAppSettings() {
           ["brevito-font-size", JSON.stringify(fontSize)],
           ["brevito-categories", JSON.stringify(selectedCategories)],
           ["brevito-show-images", JSON.stringify(showImages)],
+          ["brevito-theme", theme],
         ];
         await AsyncStorage.multiSet(settings);
       } catch (error) {
@@ -75,16 +82,18 @@ export function useAppSettings() {
     };
 
     saveSettings();
-  }, [contentLanguage, translationLanguage, level, fontSize, selectedCategories, showImages, isInitialized]);
+  }, [contentLanguage, translationLanguage, level, fontSize, selectedCategories, showImages, theme, isInitialized]);
 
   useEffect(() => {
     if (!isInitialized) return;
     setSettingsKey(prevKey => prevKey + 1);
-  }, [contentLanguage, selectedCategories, isInitialized]);
+  }, [contentLanguage, selectedCategories, theme, isInitialized]);
 
   return {
     isInitialized,
     settingsKey,
+    colors: Colors[theme],
+    theme, setTheme,
     contentLanguage, setContentLanguage,
     translationLanguage, setTranslationLanguage,
     level, setLevel,

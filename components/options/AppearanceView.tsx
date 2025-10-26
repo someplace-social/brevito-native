@@ -1,5 +1,5 @@
-import { Colors } from '@/constants/Colors';
-import { FONT_SIZES } from '@/hooks/useAppSettings';
+import { ThemeName } from '@/constants/Colors';
+import { FONT_SIZES, useAppSettings } from '@/hooks/useAppSettings';
 import { Image } from 'expo-image';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { CustomPicker } from '../ui/CustomPicker';
@@ -21,6 +21,8 @@ type AppearanceViewProps = {
   setStagedFontSize: (value: number) => void;
   stagedShowImages: boolean;
   setStagedShowImages: (value: boolean) => void;
+  stagedTheme: ThemeName;
+  setStagedTheme: (value: ThemeName) => void;
 };
 
 export function AppearanceView({
@@ -28,10 +30,13 @@ export function AppearanceView({
   setStagedFontSize,
   stagedShowImages,
   setStagedShowImages,
+  stagedTheme,
+  setStagedTheme,
 }: AppearanceViewProps) {
+  const { colors } = useAppSettings();
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
         {stagedShowImages && (
           <Image
             source="https://cdn.pixabay.com/photo/2021/03/11/02/57/mountain-6086083_640.jpg"
@@ -39,7 +44,7 @@ export function AppearanceView({
           />
         )}
         <View style={styles.cardContent}>
-          <Text style={[styles.previewText, { fontSize: stagedFontSize }]}>
+          <Text style={[styles.previewText, { fontSize: stagedFontSize, color: colors.foreground }]}>
             This is how the text will look. Adjust the slider below to change the size.
           </Text>
         </View>
@@ -52,18 +57,18 @@ export function AppearanceView({
           sizeOptions={FONT_SIZES}
         />
         <View style={styles.switchRow}>
-          <Text style={styles.label}>Show Images</Text>
+          <Text style={[styles.label, { color: colors.foreground }]}>Show Images</Text>
           <Switch
             value={stagedShowImages}
             onValueChange={setStagedShowImages}
-            trackColor={{ false: Colors.dark.muted, true: Colors.dark.primary }}
-            thumbColor={Colors.dark.foreground}
+            trackColor={{ false: colors.muted, true: colors.primary }}
+            thumbColor={colors.foreground}
           />
         </View>
         <CustomPicker
           label="Theme"
-          selectedValue="dark" // This is a placeholder; full theme switching is not yet implemented
-          onValueChange={() => {}} // Placeholder
+          selectedValue={stagedTheme}
+          onValueChange={(value) => setStagedTheme(value as ThemeName)}
           items={themeItems}
         />
       </View>
@@ -78,8 +83,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
-    backgroundColor: Colors.dark.card,
     overflow: 'hidden',
   },
   image: {
@@ -89,9 +92,7 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 16,
   },
-  previewText: {
-    color: Colors.dark.foreground,
-  },
+  previewText: {},
   controls: {
     gap: 24,
   },
@@ -101,7 +102,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    color: Colors.dark.foreground,
     fontSize: 16,
   },
 });

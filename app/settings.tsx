@@ -1,6 +1,3 @@
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/Colors';
-import { useAppSettings } from '@/hooks/useAppSettings';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -8,6 +5,8 @@ import { AppearanceView } from '../components/options/AppearanceView';
 import { LanguageView } from '../components/options/LanguageView';
 import { MainView } from '../components/options/MainView';
 import { TopicsView } from '../components/options/TopicsView';
+import { IconSymbol } from '../components/ui/icon-symbol';
+import { useAppSettings } from '../hooks/useAppSettings';
 
 type SettingsView = "main" | "topics" | "language" | "appearance";
 
@@ -22,12 +21,14 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [activeView, setActiveView] = useState<SettingsView>("main");
   const {
+    colors,
     contentLanguage, setContentLanguage,
     translationLanguage, setTranslationLanguage,
     level, setLevel,
     fontSize, setFontSize,
     selectedCategories, setSelectedCategories,
     showImages, setShowImages,
+    theme, setTheme,
   } = useAppSettings();
 
   const [stagedContentLanguage, setStagedContentLanguage] = useState(contentLanguage);
@@ -36,6 +37,7 @@ export default function SettingsScreen() {
   const [stagedCategories, setStagedCategories] = useState(selectedCategories);
   const [stagedFontSize, setStagedFontSize] = useState(fontSize);
   const [stagedShowImages, setStagedShowImages] = useState(showImages);
+  const [stagedTheme, setStagedTheme] = useState(theme);
 
   const handleSaveChanges = () => {
     const hasChanges =
@@ -44,7 +46,8 @@ export default function SettingsScreen() {
       stagedLevel !== level ||
       !categoriesAreEqual(stagedCategories, selectedCategories) ||
       stagedFontSize !== fontSize ||
-      stagedShowImages !== showImages;
+      stagedShowImages !== showImages ||
+      stagedTheme !== theme;
 
     if (hasChanges) {
       setContentLanguage(stagedContentLanguage);
@@ -53,6 +56,7 @@ export default function SettingsScreen() {
       setSelectedCategories(stagedCategories);
       setFontSize(stagedFontSize);
       setShowImages(stagedShowImages);
+      setTheme(stagedTheme);
     }
   };
 
@@ -73,13 +77,13 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <IconSymbol name={activeView === 'main' ? 'xmark' : 'arrow.left'} size={24} color={Colors.dark.foreground} />
+            <IconSymbol name={activeView === 'main' ? 'xmark' : 'arrow.left'} size={24} color={colors.foreground} />
           </TouchableOpacity>
-          <Text style={styles.title}>{viewTitles[activeView]}</Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>{viewTitles[activeView]}</Text>
         </View>
         <View style={styles.content}>
           {activeView === 'main' && <MainView setActiveView={setActiveView} />}
@@ -100,6 +104,8 @@ export default function SettingsScreen() {
               setStagedFontSize={setStagedFontSize}
               stagedShowImages={stagedShowImages}
               setStagedShowImages={setStagedShowImages}
+              stagedTheme={stagedTheme}
+              setStagedTheme={setStagedTheme}
             />
           )}
         </View>
@@ -111,7 +117,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
   },
   container: {
     flex: 1,
@@ -122,20 +127,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     paddingBottom: 16,
-    paddingTop: Platform.OS === 'android' ? 24 : 16,
+    paddingTop: Platform.OS === 'android' ? 48 : 32,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
   },
   backButton: {
     position: 'absolute',
     left: 16,
-    top: Platform.OS === 'android' ? 24 : 16,
+    top: Platform.OS === 'android' ? 48 : 32,
     zIndex: 1,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.dark.foreground,
   },
   content: {
     flex: 1,
