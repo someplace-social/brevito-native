@@ -26,41 +26,30 @@ export function useWordTranslation({
       return;
     }
 
-    const fetchTranslation = async () => {
+    const fetchOrInvokeTranslation = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        // NOTE: This implementation only fetches existing translations.
-        // A Supabase Edge Function would be required to call a third-party
-        // translation API (like DeepL) and insert new translations without
-        // exposing API keys on the client.
-        const { data, error } = await supabase
-          .from('word_translations')
-          .select('translation')
-          .eq('word', word.toLowerCase())
-          .eq('source_language', sourceLanguage)
-          .eq('target_language', targetLanguage)
-          .limit(1)
-          .single();
+        const { data, error } = await supabase.functions.invoke('translate-and-store', {
+          body: { word, sourceLanguage, targetLanguage, context },
+        });
 
-        if (error && error.code !== 'PGRST116') { // Ignore 'single row not found'
-          throw error;
+        if (error) throw error;
+        
+        if (data.error) {
+          throw new Error(data.error);
         }
 
-        if (data) {
-          setTranslation(data.translation.primaryTranslation);
-        } else {
-          // Placeholder for when no translation is found in the DB
-          setTranslation('No translation found.');
-        }
+        setTranslation(data.primaryTranslation);
       } catch (err: any) {
         setError(err.message || 'An error occurred.');
+        setTranslation('Translation failed.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTranslation();
+    fetchOrInvokeTranslation();
   }, [word, sourceLanguage, targetLanguage, context, enabled]);
 
   return { translation, isLoading, error };
