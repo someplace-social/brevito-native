@@ -1,7 +1,7 @@
 import { ThemeName } from '@/constants/Colors';
 import { FONT_SIZES, useAppSettings } from '@/hooks/useAppSettings';
 import { Image } from 'expo-image';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { CustomPicker } from '../ui/CustomPicker';
 import { FontSizeSlider } from '../ui/FontSizeSlider';
 
@@ -48,6 +48,20 @@ export function AppearanceView({
           <Text style={[styles.previewText, { fontSize: stagedFontSize, color: colors.foreground }]}>
             This is how the text will look. Adjust the slider below to change the size.
           </Text>
+          <View style={styles.buttonPreviewContainer}>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: colors.primary }]}>
+              <Text style={[styles.buttonText, { color: colors.primaryForeground }]}>Primary</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: colors.secondary }]}>
+              <Text style={[styles.buttonText, { color: colors.secondaryForeground }]}>Secondary</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: colors.accent }]}>
+              <Text style={[styles.buttonText, { color: colors.accentForeground }]}>Accent</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -63,7 +77,7 @@ export function AppearanceView({
             value={stagedShowImages}
             onValueChange={setStagedShowImages}
             trackColor={{ false: colors.muted, true: colors.primary }}
-            thumbColor={colors.card}
+            thumbColor={stagedShowImages ? colors.card : ''}
           />
         </View>
         <CustomPicker
@@ -92,6 +106,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 16,
+    gap: 16,
   },
   previewText: {},
   controls: {
@@ -104,5 +119,21 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+  },
+  buttonPreviewContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 8,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
