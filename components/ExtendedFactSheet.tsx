@@ -32,6 +32,9 @@ type ExtendedFactSheetProps = {
   colors: ColorTheme;
 };
 
+// Type assertion to bypass incorrect official type definitions
+const TextWithSelection = Text as any;
+
 export function ExtendedFactSheet({
   factId,
   isVisible,
@@ -58,7 +61,7 @@ export function ExtendedFactSheet({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handlePressOut = () => {
+  const handleTouchEnd = () => {
     if (selection && selection.start !== selection.end && data?.content) {
       const selectedText = data.content.substring(selection.start, selection.end).trim();
       if (selectedText) {
@@ -183,14 +186,13 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
-                  // @ts-ignore - onSelectionChange is a valid prop but is missing from the official Text component types.
-                  <Text
+                  <TextWithSelection
                     selectable
-                    onPressOut={handlePressOut}
+                    onTouchEnd={handleTouchEnd}
                     onSelectionChange={handleSelectionChange}
                     style={[styles.contentText, { fontSize }]}>
                     {data.content}
-                  </Text>
+                  </TextWithSelection>
                 )}
                 {data.source && data.source_url && (
                   <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>

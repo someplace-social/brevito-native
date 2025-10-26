@@ -31,6 +31,9 @@ type FactCardProps = {
   colors: ColorTheme;
 };
 
+// Type assertion to bypass incorrect official type definitions
+const TextWithSelection = Text as any;
+
 export function FactCard({
   factId,
   category,
@@ -61,7 +64,7 @@ export function FactCard({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handlePressOut = () => {
+  const handleTouchEnd = () => {
     if (selection && selection.start !== selection.end && content) {
       const selectedText = content.substring(selection.start, selection.end).trim();
       if (selectedText) {
@@ -165,14 +168,13 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
-            // @ts-ignore - onSelectionChange is a valid prop but is missing from the official Text component types.
-            <Text
+            <TextWithSelection
               selectable
-              onPressOut={handlePressOut}
+              onTouchEnd={handleTouchEnd}
               onSelectionChange={handleSelectionChange}
               style={[styles.contentText, { fontSize }]}>
               {content}
-            </Text>
+            </TextWithSelection>
           )}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
