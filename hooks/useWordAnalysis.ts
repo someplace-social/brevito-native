@@ -37,12 +37,17 @@ export function useWordAnalysis({
     }
 
     const fetchAnalysis = async () => {
+      console.log(`[useWordAnalysis] Starting fetch for: "${word}"`);
       setIsLoading(true);
       setError(null);
       try {
+        console.log('[useWordAnalysis] Invoking supabase function "analyze-word"...');
         const { data, error: invokeError } = await supabase.functions.invoke('analyze-word', {
           body: { word, sourceLanguage, targetLanguage },
         });
+
+        console.log('[useWordAnalysis] Invoke response error:', invokeError);
+        console.log('[useWordAnalysis] Invoke response data:', data);
 
         if (invokeError) throw invokeError;
 
@@ -56,6 +61,7 @@ export function useWordAnalysis({
           throw new Error("Sorry, we couldn't find a detailed analysis for this word.");
         }
       } catch (err: any) {
+        console.error('[useWordAnalysis] Fetch error:', err);
         setError(err.message || 'An error occurred fetching analysis.');
       } finally {
         setIsLoading(false);

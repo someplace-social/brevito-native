@@ -1,8 +1,7 @@
-// v1.6: Correct Gemini model name for analysis
+// v1.7: Add detailed logging for debugging Gemini API response
 import { serve } from 'http';
 import { createClient } from 'supabase';
 
-// Define the expected structure of the AI's response
 interface WordAnalysis {
   rootWord?: string;
   analysis: {
@@ -25,8 +24,8 @@ serve(async (req: Request) => {
 
   try {
     const { word, sourceLanguage, targetLanguage } = await req.json();
-    console.log(`Analyzing word: ${word} (${sourceLanguage} -> ${targetLanguage})`);
-    
+    console.log(`[START] Analyzing word: ${word} (${sourceLanguage} -> ${targetLanguage})`);
+
     if (!word || !sourceLanguage || !targetLanguage) {
       throw new Error('Missing required parameters: word, sourceLanguage, or targetLanguage');
     }
@@ -46,12 +45,14 @@ serve(async (req: Request) => {
       .maybeSingle();
 
     if (existingAnalysis) {
+      console.log(`[CACHE] Found existing analysis for "${word}"`);
       return new Response(JSON.stringify(existingAnalysis.analysis), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     }
 
+    console.log(`[API_CALL] No cache found. Calling Gemini API for "${word}".`);
     const genAIKey = Deno.env.get('GEN_AI_KEY');
     if (!genAIKey) throw new Error('GEN_AI_KEY not found in secrets.');
 
@@ -79,28 +80,32 @@ serve(async (req: Request) => {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
       }
     );
 
     const geminiData = await geminiResponse.json();
+    console.log('[API_RESPONSE] Raw Gemini Data:', JSON.stringify(geminiData, null, 2));
+
     if (!geminiResponse.ok) {
-      const errorDetails = JSON.stringify(geminiData, null, 2);
-      console.error('Gemini API Error:', errorDetails);
-      throw new Error(`Gemini API request failed with status ${geminiResponse.status}. Details: ${errorDetails}`);
+      throw new Error(`Gemini API request failed with status ${geminiResponse.status}. Details: ${JSON.stringify(geminiData)}`);
     }
     
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!rawText) {
-      const errorDetails = JSON.stringify(geminiData, null, 2);
-      console.error('Invalid response structure from Gemini API:', errorDetails);
-      throw new Error(`Invalid response structure from Gemini API. Full response: ${errorDetails}`);
+      throw new Error(`Invalid response structure from Gemini API. Full response: ${JSON.stringify(geminiData)}`);
+    }
+    console.log('[API_RESPONSE] Extracted Raw Text:', rawText);
+
+    let newAnalysis: WordAnalysis;
+    try {
+      newAnalysis = JSON.parse(rawText.trim().replace(/```json|```/g, ''));
+    } catch (parseError) {
+      console.error('[PARSE_ERROR] Failed to parse Gemini response:', parseError.message);
+      throw new Error(`Failed to parse JSON from Gemini response. Raw text: ${rawText}`);
     }
 
-    const newAnalysis: WordAnalysis = JSON.parse(rawText.trim().replace(/```json|```/g, ''));
-
+    console.log(`[DB_INSERT] Storing new analysis for "${word}".`);
     await supabaseAdmin
       .from('word_analysis')
       .insert({
@@ -110,6 +115,7 @@ serve(async (req: Request) => {
         analysis: newAnalysis,
       });
 
+    console.log(`[SUCCESS] Successfully processed and stored analysis for "${word}".`);
     return new Response(JSON.stringify(newAnalysis), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
@@ -117,7 +123,7 @@ serve(async (req: Request) => {
 
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    console.error('Edge function error:', message);
+    console.error('[FATAL_ERROR] Edge function error:', message);
     return new Response(JSON.stringify({ error: `Function Error: ${message}` }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
