@@ -1,5 +1,5 @@
-import { Colors } from '@/constants/Colors';
-import { AVAILABLE_CATEGORIES } from '@/hooks/useAppSettings';
+import { AVAILABLE_CATEGORIES, useAppSettings } from '@/hooks/useAppSettings';
+import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Toggle } from '../ui/Toggle';
 
@@ -9,6 +9,8 @@ type TopicsViewProps = {
 };
 
 export function TopicsView({ stagedCategories, setStagedCategories }: TopicsViewProps) {
+  const { colors } = useAppSettings();
+
   const handleCategoryToggle = (category: string) => {
     setStagedCategories((currentCategories) => {
       const isCurrentlySelected = currentCategories.includes(category);
@@ -28,6 +30,38 @@ export function TopicsView({ stagedCategories, setStagedCategories }: TopicsView
       return currentCategories.length > 1 ? [currentCategories[0]] : currentCategories;
     });
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    toggleContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      gap: 16,
+    },
+    button: {
+      flex: 1,
+      paddingVertical: 12,
+      backgroundColor: colors.secondary,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: colors.secondaryForeground,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -53,35 +87,3 @@ export function TopicsView({ stagedCategories, setStagedCategories }: TopicsView
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
-    gap: 16,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: Colors.dark.secondary,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: Colors.dark.secondaryForeground,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

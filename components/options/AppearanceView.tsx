@@ -23,6 +23,7 @@ type AppearanceViewProps = {
   setStagedShowImages: (value: boolean) => void;
   stagedTheme: ThemeName;
   setStagedTheme: (value: ThemeName) => void;
+  setGlobalTheme: (value: ThemeName) => void;
 };
 
 export function AppearanceView({
@@ -32,8 +33,15 @@ export function AppearanceView({
   setStagedShowImages,
   stagedTheme,
   setStagedTheme,
+  setGlobalTheme,
 }: AppearanceViewProps) {
   const { colors } = useAppSettings();
+
+  const handleThemeChange = (newTheme: ThemeName) => {
+    setStagedTheme(newTheme);
+    setGlobalTheme(newTheme);
+  };
+
   return (
     <View style={styles.container}>
       <View style={[styles.card, { borderColor: colors.border, backgroundColor: colors.card }]}>
@@ -62,13 +70,13 @@ export function AppearanceView({
             value={stagedShowImages}
             onValueChange={setStagedShowImages}
             trackColor={{ false: colors.muted, true: colors.primary }}
-            thumbColor={colors.foreground}
+            thumbColor={colors.card}
           />
         </View>
         <CustomPicker
           label="Theme"
           selectedValue={stagedTheme}
-          onValueChange={(value) => setStagedTheme(value as ThemeName)}
+          onValueChange={(value) => handleThemeChange(value as ThemeName)}
           items={themeItems}
         />
       </View>

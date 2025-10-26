@@ -40,14 +40,14 @@ export default function SettingsScreen() {
   const [stagedTheme, setStagedTheme] = useState(theme);
 
   const handleSaveChanges = () => {
+    // Theme is saved instantly, so we exclude it from this check.
     const hasChanges =
       stagedContentLanguage !== contentLanguage ||
       stagedTranslationLanguage !== translationLanguage ||
       stagedLevel !== level ||
       !categoriesAreEqual(stagedCategories, selectedCategories) ||
       stagedFontSize !== fontSize ||
-      stagedShowImages !== showImages ||
-      stagedTheme !== theme;
+      stagedShowImages !== showImages;
 
     if (hasChanges) {
       setContentLanguage(stagedContentLanguage);
@@ -56,7 +56,6 @@ export default function SettingsScreen() {
       setSelectedCategories(stagedCategories);
       setFontSize(stagedFontSize);
       setShowImages(stagedShowImages);
-      setTheme(stagedTheme);
     }
   };
 
@@ -106,6 +105,7 @@ export default function SettingsScreen() {
               setStagedShowImages={setStagedShowImages}
               stagedTheme={stagedTheme}
               setStagedTheme={setStagedTheme}
+              setGlobalTheme={setTheme}
             />
           )}
         </View>
@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
     paddingBottom: 16,
-    paddingTop: Platform.OS === 'android' ? 48 : 32,
+    paddingTop: Platform.OS === 'android' ? 64 : 48,
     borderBottomWidth: 1,
   },
   backButton: {
     position: 'absolute',
     left: 16,
-    top: Platform.OS === 'android' ? 48 : 32,
+    top: Platform.OS === 'android' ? 64 : 48,
     zIndex: 1,
   },
   title: {
