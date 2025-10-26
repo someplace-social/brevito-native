@@ -45,12 +45,9 @@ export function ExtendedFactSheet({
   };
 
   const styles = useMemo(() => StyleSheet.create({
-    modalContainer: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
     safeArea: {
       flex: 1,
+      backgroundColor: colors.background,
     },
     header: {
       flexDirection: 'row',
@@ -118,43 +115,41 @@ export function ExtendedFactSheet({
 
   return (
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.backButton}>
-              <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Details</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <IconSymbol name="xmark" size={24} color={colors.foreground} />
-            </TouchableOpacity>
-          </View>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            {data && (
-              <View style={styles.content}>
-                {showImages && data.image_url && (
-                  <Image source={{ uri: data.image_url }} style={styles.image} />
-                )}
-                {data.category && (
-                  <Text style={styles.categoryText}>
-                    {data.category}
-                    {data.subcategory && ` > ${data.subcategory}`}
-                  </Text>
-                )}
-                <Text style={[styles.contentText, { fontSize }]}>{data.content}</Text>
-                {data.source && data.source_url && (
-                  <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
-                    <Text style={styles.sourceText}>Source: {data.source}</Text>
-                    <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
-                  </TouchableOpacity>
-                )}
-              </View>
-            )}
-          </ScrollView>
-        </SafeAreaView>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} style={styles.backButton}>
+            <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Details</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <IconSymbol name="xmark" size={24} color={colors.foreground} />
+          </TouchableOpacity>
+        </View>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          {data && (
+            <View style={styles.content}>
+              {showImages && data.image_url && (
+                <Image source={{ uri: data.image_url }} style={styles.image} />
+              )}
+              {data.category && (
+                <Text style={styles.categoryText}>
+                  {data.category}
+                  {data.subcategory && ` > ${data.subcategory}`}
+                </Text>
+              )}
+              <Text style={[styles.contentText, { fontSize }]}>{data.content}</Text>
+              {data.source && data.source_url && (
+                <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
+                  <Text style={styles.sourceText}>Source: {data.source}</Text>
+                  <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
     </Modal>
   );
 }
