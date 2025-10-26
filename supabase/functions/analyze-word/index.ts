@@ -66,7 +66,7 @@ serve(async (req: Request) => {
           {
             "partOfSpeech": "e.g., Noun, Verb, Adjective",
             "translation": "The most common translation in ${targetLanguage}",
-            "exampleSentence": "A simple example sentence in ${sourceLanguage} using the word.",
+            "exampleSentence": "A simple example sentence in ${sourceLanguage} that MUST contain the exact word '${word}'.",
             "exampleTranslation": "The translation of the example sentence in ${targetLanguage}."
           }
         ]
