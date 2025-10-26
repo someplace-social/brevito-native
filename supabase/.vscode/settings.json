@@ -2,5 +2,6 @@
   "deno.enable": true,
   "deno.lint": true,
   "deno.unstable": true,
+  "typescript.validate.enable": false,
   "typescript.tsdk": null
 }

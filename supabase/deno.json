@@ -1,0 +1,5 @@
+{
+  "compilerOptions": {
+    "unstable": true
+  }
+}
