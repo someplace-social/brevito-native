@@ -6,6 +6,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -57,7 +58,7 @@ export function FactCard({
 }: FactCardProps) {
   const cardRef = useRef<View>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
+  const lastValidSelection = useRef<{ start: number; end: number } | undefined>();
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
     position: null,
@@ -72,12 +73,16 @@ export function FactCard({
   });
 
   const handleSelectionChange = (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
-    setSelection(event.nativeEvent.selection);
+    const currentSelection = event.nativeEvent.selection;
+    if (currentSelection.start !== currentSelection.end) {
+      lastValidSelection.current = currentSelection;
+    }
   };
 
   const handlePressOut = (event: NativeSyntheticEvent<any>) => {
-    if (selection && selection.start !== selection.end && content) {
-      const selectedText = content.substring(selection.start, selection.end).trim();
+    const finalSelection = lastValidSelection.current;
+    if (finalSelection && finalSelection.start !== finalSelection.end && content) {
+      const selectedText = content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         cardRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
@@ -85,12 +90,13 @@ export function FactCard({
             isVisible: true,
             selectedWord: selectedText,
             position: {
-              top: event.nativeEvent.pageY - py - 60, // Adjust for popover height
+              top: event.nativeEvent.pageY - py - 60,
               left: event.nativeEvent.pageX - px,
             },
           });
         });
       }
+      lastValidSelection.current = undefined;
     }
   };
 
@@ -199,15 +205,18 @@ export function FactCard({
             {error && <Text style={styles.errorText}>{error}</Text>}
             {content && (
               <Pressable onPressOut={handlePressOut}>
+                {/* @ts-ignore */}
                 <TextInput
                   value={content}
-                  editable={false}
                   multiline
-                  selectable
-                  contextMenuHidden
                   onSelectionChange={handleSelectionChange}
                   style={[styles.contentText, { fontSize }]}
                   scrollEnabled={false}
+                  contextMenuHidden
+                  editable={Platform.OS !== 'ios'}
+                  selectable
+                  caretHidden={Platform.OS !== 'ios'}
+                  showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
                 />
               </Pressable>
             )}
