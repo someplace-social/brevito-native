@@ -1,9 +1,3 @@
-import { ExtendedFactSheet } from '@/components/ExtendedFactSheet';
-import { FactCard } from '@/components/FactCard';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/Colors';
-import { useAppSettings } from '@/hooks/useAppSettings';
-import { useFactFeed } from '@/hooks/useFactFeed';
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import {
@@ -17,6 +11,12 @@ import {
   View,
   ViewToken,
 } from 'react-native';
+import { ExtendedFactSheet } from '../components/ExtendedFactSheet';
+import { FactCard } from '../components/FactCard';
+import { IconSymbol } from '../components/ui/icon-symbol';
+import { Colors } from '../constants/Colors';
+import { useAppSettings } from '../hooks/useAppSettings';
+import { useFactFeed } from '../hooks/useFactFeed';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    paddingTop: 40,
+    paddingTop: 32,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
     backgroundColor: Colors.dark.background,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     top: '50%',
-    transform: [{ translateY: 20 }],
+    transform: [{ translateY: 16 }],
   },
   listContent: {
     padding: 16,
