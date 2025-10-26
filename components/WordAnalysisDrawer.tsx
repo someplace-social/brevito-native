@@ -81,7 +81,6 @@ export function WordAnalysisDrawer({
       backgroundColor: colors.background,
       borderTopLeftRadius: 12,
       borderTopRightRadius: 12,
-      paddingBottom: insets.bottom,
     },
     header: {
       flexDirection: 'row',
@@ -168,7 +167,7 @@ export function WordAnalysisDrawer({
       justifyContent: 'center',
       alignItems: 'center',
     }
-  }), [colors, insets]);
+  }), [colors]);
 
   return (
     <Modal animationType="slide" transparent visible={isOpen} onRequestClose={onClose}>
@@ -210,6 +209,7 @@ export function WordAnalysisDrawer({
               </View>
             )}
           </ScrollView>
+          <View style={{ height: insets.bottom }} />
         </View>
       </View>
     </Modal>
