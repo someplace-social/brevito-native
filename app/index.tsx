@@ -91,7 +91,7 @@ export default function HomeScreen() {
       color: colors.foreground,
     },
     subtitle: {
-      fontSize: 14,
+      fontSize: 12,
       color: colors.mutedForeground,
     },
     menuButton: {
@@ -102,7 +102,7 @@ export default function HomeScreen() {
     },
     listContent: {
       padding: 16,
-      gap: 16,
+      gap: 24,
     },
     spinner: {
       marginVertical: 20,
