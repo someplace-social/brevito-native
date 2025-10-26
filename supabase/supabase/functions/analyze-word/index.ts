@@ -1,6 +1,6 @@
-// v1.1: Force redeploy with enhanced logging
-import { serve } from 'http';
-import { createClient } from 'supabase';
+// v1.5: Use gemini-2.0-flash model as requested
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Define the expected structure of the AI's response
 interface WordAnalysis {
@@ -25,6 +25,8 @@ serve(async (req: Request) => {
 
   try {
     const { word, sourceLanguage, targetLanguage } = await req.json();
+    console.log(`Analyzing word: ${word} (${sourceLanguage} -> ${targetLanguage})`);
+
     if (!word || !sourceLanguage || !targetLanguage) {
       throw new Error('Missing required parameters: word, sourceLanguage, or targetLanguage');
     }
@@ -73,7 +75,7 @@ serve(async (req: Request) => {
     `;
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${genAIKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genAIKey}`, // Using user-specified model
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -89,7 +91,7 @@ serve(async (req: Request) => {
       console.error('Gemini API Error:', errorDetails);
       throw new Error(`Gemini API request failed with status ${geminiResponse.status}. Details: ${errorDetails}`);
     }
-    
+
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!rawText) {
       const errorDetails = JSON.stringify(geminiData, null, 2);
