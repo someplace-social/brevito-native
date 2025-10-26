@@ -1,8 +1,7 @@
 import { Colors } from '@/constants/Colors';
-import { Button, StyleSheet, View } from 'react-native';
+import { AVAILABLE_CATEGORIES } from '@/hooks/useAppSettings';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Toggle } from '../ui/Toggle';
-
-const availableCategories = ["Science", "Technology", "Health", "History", "Business", "Society", "Art", "Sports", "Environment", "Culture", "Food", "Geography", "Psychology", "Animals", "Space", "Language", "Unusual"];
 
 type TopicsViewProps = {
   stagedCategories: string[];
@@ -33,7 +32,7 @@ export function TopicsView({ stagedCategories, setStagedCategories }: TopicsView
   return (
     <View style={styles.container}>
       <View style={styles.toggleContainer}>
-        {availableCategories.map((category) => (
+        {AVAILABLE_CATEGORIES.map((category) => (
           <Toggle
             key={category}
             pressed={stagedCategories.includes(category)}
@@ -44,8 +43,12 @@ export function TopicsView({ stagedCategories, setStagedCategories }: TopicsView
         ))}
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="Select All" onPress={() => setStagedCategories(availableCategories)} color={Colors.dark.primary} />
-        <Button title="Deselect All" onPress={handleDeselectAll} color={Colors.dark.primary} />
+        <TouchableOpacity style={styles.button} onPress={() => setStagedCategories(AVAILABLE_CATEGORIES)}>
+          <Text style={styles.buttonText}>Select All</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleDeselectAll}>
+          <Text style={styles.buttonText}>Deselect All</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -54,7 +57,7 @@ export function TopicsView({ stagedCategories, setStagedCategories }: TopicsView
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 24,
+    justifyContent: 'space-between',
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -67,5 +70,18 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,
+    gap: 16,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: Colors.dark.secondary,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: Colors.dark.secondaryForeground,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

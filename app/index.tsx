@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    paddingTop: 90,
+    paddingTop: 40,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
     backgroundColor: Colors.dark.background,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     top: '50%',
-    transform: [{ translateY: 4 }],
+    transform: [{ translateY: 20 }],
   },
   listContent: {
     padding: 16,

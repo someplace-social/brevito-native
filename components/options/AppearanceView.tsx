@@ -1,8 +1,11 @@
-import { Colors } from '@/constants/Colors';
-import { FONT_SIZES } from '@/hooks/useAppSettings';
-import { Image } from 'expo-image';
 import { StyleSheet, Switch, Text, View } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { Image } from 'expo-image';
 import { FontSizeStepper } from '../ui/FontSizeStepper';
+import { FONT_SIZES } from '@/hooks/useAppSettings';
+import { CustomPicker } from '../ui/CustomPicker';
+
+const themeItems = [{ label: 'Dark', value: 'dark' }];
 
 type AppearanceViewProps = {
   stagedFontSize: number;
@@ -48,6 +51,12 @@ export function AppearanceView({
             thumbColor={Colors.dark.foreground}
           />
         </View>
+        <CustomPicker
+          label="Theme"
+          selectedValue="dark"
+          onValueChange={() => {}}
+          items={themeItems}
+        />
       </View>
     </View>
   );
