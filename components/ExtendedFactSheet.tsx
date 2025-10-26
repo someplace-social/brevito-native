@@ -7,9 +7,11 @@ import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   Modal,
   NativeSyntheticEvent,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -80,14 +82,25 @@ export function ExtendedFactSheet({
       const selectedText = data.content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        sheetRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
+        sheetRef.current?.measure((_fx, _fy, width, _height, px, py) => {
+          const { width: screenWidth } = Dimensions.get('window');
+          const popoverWidth = 200;
+          const popoverHeight = 60;
+
+          const touchX = event.nativeEvent.pageX;
+          const touchY = event.nativeEvent.pageY;
+
+          let top = touchY - py - popoverHeight - 10;
+          let left = touchX - px - popoverWidth / 2;
+
+          if (left + popoverWidth > width) left = width - popoverWidth - 16;
+          if (left < 0) left = 16;
+          if (top < 0) top = touchY - py + 20;
+
           setPopoverState({
             isVisible: true,
             selectedWord: selectedText,
-            position: {
-              top: event.nativeEvent.pageY - py - 60,
-              left: event.nativeEvent.pageX - px,
-            },
+            position: { top, left },
           });
         });
       }
@@ -222,34 +235,40 @@ export function ExtendedFactSheet({
             {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {data && (
-              <View style={styles.content} ref={sheetRef}>
-                {showImages && data.image_url && (
-                  <Image source={{ uri: data.image_url }} style={styles.image} />
-                )}
-                {data.category && (
-                  <Text style={styles.categoryText}>
-                    {data.category}
-                    {data.subcategory && ` > ${data.subcategory}`}
-                  </Text>
-                )}
-                {data.content && <TextInput {...(textInputProps as any)} />}
-                {data.source && data.source_url && (
-                  <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
-                    <Text style={styles.sourceText}>Source: {data.source}</Text>
-                    <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
-                  </TouchableOpacity>
-                )}
-                <TranslationPopover
-                  isVisible={popoverState.isVisible}
-                  position={popoverState.position}
-                  selectedWord={popoverState.selectedWord}
-                  contentLanguage={language}
-                  translationLanguage={translationLanguage}
-                  context={data.content}
-                  onLearnMore={handleLearnMore}
-                  colors={colors}
-                />
-              </View>
+              <Pressable onPress={handleClosePopover}>
+                <View style={styles.content} ref={sheetRef}>
+                  {showImages && data.image_url && (
+                    <Image source={{ uri: data.image_url }} style={styles.image} />
+                  )}
+                  {data.category && (
+                    <Text style={styles.categoryText}>
+                      {data.category}
+                      {data.subcategory && ` > ${data.subcategory}`}
+                    </Text>
+                  )}
+                  {data.content && (
+                    <View onStartShouldSetResponder={() => true}>
+                      <TextInput {...(textInputProps as any)} />
+                    </View>
+                  )}
+                  {data.source && data.source_url && (
+                    <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
+                      <Text style={styles.sourceText}>Source: {data.source}</Text>
+                      <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
+                    </TouchableOpacity>
+                  )}
+                  <TranslationPopover
+                    isVisible={popoverState.isVisible}
+                    position={popoverState.position}
+                    selectedWord={popoverState.selectedWord}
+                    contentLanguage={language}
+                    translationLanguage={translationLanguage}
+                    context={data.content}
+                    onLearnMore={handleLearnMore}
+                    colors={colors}
+                  />
+                </View>
+              </Pressable>
             )}
           </ScrollView>
         </SafeAreaView>

@@ -5,8 +5,10 @@ import { Image } from 'expo-image';
 import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   NativeSyntheticEvent,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -84,14 +86,25 @@ export function FactCard({
       const selectedText = content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        cardRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
+        cardRef.current?.measure((_fx, _fy, width, _height, px, py) => {
+          const { width: screenWidth } = Dimensions.get('window');
+          const popoverWidth = 200;
+          const popoverHeight = 60;
+
+          const touchX = event.nativeEvent.pageX;
+          const touchY = event.nativeEvent.pageY;
+
+          let top = touchY - py - popoverHeight - 10;
+          let left = touchX - px - popoverWidth / 2;
+
+          if (left + popoverWidth > width) left = width - popoverWidth - 16;
+          if (left < 0) left = 16;
+          if (top < 0) top = touchY - py + 20;
+
           setPopoverState({
             isVisible: true,
             selectedWord: selectedText,
-            position: {
-              top: event.nativeEvent.pageY - py - 60,
-              left: event.nativeEvent.pageX - px,
-            },
+            position: { top, left },
           });
         });
       }
@@ -193,37 +206,43 @@ export function FactCard({
 
   return (
     <View ref={cardRef}>
-      <View style={styles.card}>
-        {showImages && imageUrl && (
-          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
-        )}
-        <View style={styles.contentContainer}>
-          {category && (
-            <View style={styles.categoryContainer}>
-              <TouchableOpacity onPress={() => handleCategoryPress(category)}>
-                <Text style={styles.categoryText}>{category}</Text>
-              </TouchableOpacity>
-              {subcategory && (
-                <>
-                  <Text style={styles.categoryText}> &gt; </Text>
-                  <TouchableOpacity onPress={() => handleCategoryPress(category)}>
-                    <Text style={styles.categoryText}>{subcategory}</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
+      <Pressable onPress={handleClosePopover}>
+        <View style={styles.card}>
+          {showImages && imageUrl && (
+            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
           )}
-          {isLoading && <ActivityIndicator color={colors.primary} />}
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {content && <TextInput {...(textInputProps as any)} />}
-        </View>
-        <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
-          <View style={styles.readMoreButton}>
-            <Text style={styles.readMoreText}>Read More</Text>
-            <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
+          <View style={styles.contentContainer}>
+            {category && (
+              <View style={styles.categoryContainer}>
+                <TouchableOpacity onPress={() => handleCategoryPress(category)}>
+                  <Text style={styles.categoryText}>{category}</Text>
+                </TouchableOpacity>
+                {subcategory && (
+                  <>
+                    <Text style={styles.categoryText}> &gt; </Text>
+                    <TouchableOpacity onPress={() => handleCategoryPress(category)}>
+                      <Text style={styles.categoryText}>{subcategory}</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            )}
+            {isLoading && <ActivityIndicator color={colors.primary} />}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            {content && (
+              <View onStartShouldSetResponder={() => true}>
+                <TextInput {...(textInputProps as any)} />
+              </View>
+            )}
           </View>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
+            <View style={styles.readMoreButton}>
+              <Text style={styles.readMoreText}>Read More</Text>
+              <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </Pressable>
       <TranslationPopover
         isVisible={popoverState.isVisible}
         position={popoverState.position}
