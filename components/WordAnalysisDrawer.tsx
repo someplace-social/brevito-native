@@ -1,15 +1,15 @@
 import { ColorTheme } from '@/constants/Colors';
 import { useWordAnalysis } from '@/hooks/useWordAnalysis';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
-    ActivityIndicator,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
 
@@ -54,6 +54,18 @@ export function WordAnalysisDrawer({
     targetLanguage,
     enabled: isOpen,
   });
+
+  // --- DIAGNOSTIC LOGGING ---
+  useEffect(() => {
+    if (isOpen) {
+      console.log('--- Word Analysis Drawer ---');
+      console.log('Is Loading:', isLoading);
+      console.log('Error:', error);
+      console.log('Analysis Data:', JSON.stringify(analysis, null, 2));
+      console.log('--------------------------');
+    }
+  }, [isOpen, isLoading, error, analysis]);
+  // -------------------------
 
   const styles = useMemo(() => StyleSheet.create({
     modalOverlay: {
@@ -147,6 +159,11 @@ export function WordAnalysisDrawer({
       color: colors.destructive,
       textAlign: 'center',
     },
+    centered: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    }
   }), [colors]);
 
   return (
@@ -160,7 +177,11 @@ export function WordAnalysisDrawer({
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={styles.scrollContent}>
-            {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
+            {isLoading && (
+              <View style={styles.centered}>
+                <ActivityIndicator size="large" color={colors.primary} />
+              </View>
+            )}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {analysis && (
               <View style={styles.analysisContainer}>
