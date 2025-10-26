@@ -57,9 +57,15 @@ export function ExtendedFactSheet({
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    closeButton: {
+    backButton: {
       position: 'absolute',
       left: 16,
+      top: 16,
+      zIndex: 1,
+    },
+    closeButton: {
+      position: 'absolute',
+      right: 16,
       top: 16,
       zIndex: 1,
     },
@@ -111,10 +117,13 @@ export function ExtendedFactSheet({
     <Modal animationType="slide" transparent={false} visible={isVisible} onRequestClose={onClose}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.backButton}>
             <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
           </TouchableOpacity>
           <Text style={styles.title}>Details</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <IconSymbol name="xmark" size={24} color={colors.foreground} />
+          </TouchableOpacity>
         </View>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {isLoading && <ActivityIndicator size="large" color={colors.primary} />}

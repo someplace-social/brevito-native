@@ -38,7 +38,7 @@ export function MainView({ setActiveView }: MainViewProps) {
       fontSize: 18,
     },
     icon: {
-      color: colors.mutedForeground,
+      color: colors.secondaryForeground,
     },
   }), [colors]);
 

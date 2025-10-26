@@ -11,7 +11,7 @@ const MAPPING: Record<string, ComponentProps<typeof MaterialIcons>['name']> = {
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
   'line.3.horizontal': 'menu',
-  'arrow.up.right': 'arrow-upward',
+  'arrow.up.right': 'north-east',
   'arrow.left': 'arrow-back',
   grid: 'apps',
   globe: 'language',

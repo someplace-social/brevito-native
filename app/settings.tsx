@@ -57,11 +57,13 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleClose = () => {
+    handleSaveChanges();
+    router.back();
+  };
+
   const handleBack = () => {
-    if (activeView === 'main') {
-      handleSaveChanges();
-      router.back();
-    } else {
+    if (activeView !== 'main') {
       setActiveView('main');
     }
   };
@@ -77,10 +79,15 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <IconSymbol name={activeView === 'main' ? 'xmark' : 'arrow.left'} size={24} color={colors.foreground} />
-          </TouchableOpacity>
+          {activeView !== 'main' && (
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <IconSymbol name={'arrow.left'} size={24} color={colors.foreground} />
+            </TouchableOpacity>
+          )}
           <Text style={[styles.title, { color: colors.foreground }]}>{viewTitles[activeView]}</Text>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+            <IconSymbol name="xmark" size={24} color={colors.foreground} />
+          </TouchableOpacity>
         </View>
         <View style={styles.content}>
           {activeView === 'main' && <MainView setActiveView={setActiveView} />}
@@ -130,6 +137,12 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 16,
+    top: Platform.OS === 'android' ? 64 : 48,
+    zIndex: 1,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 16,
     top: Platform.OS === 'android' ? 64 : 48,
     zIndex: 1,
   },
