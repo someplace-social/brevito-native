@@ -1,6 +1,6 @@
 // v1.5: Use gemini-2.0-flash model as requested
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from 'http';
+import { createClient } from 'supabase';
 
 // Define the expected structure of the AI's response
 interface WordAnalysis {
@@ -26,7 +26,7 @@ serve(async (req: Request) => {
   try {
     const { word, sourceLanguage, targetLanguage } = await req.json();
     console.log(`Analyzing word: ${word} (${sourceLanguage} -> ${targetLanguage})`);
-
+    
     if (!word || !sourceLanguage || !targetLanguage) {
       throw new Error('Missing required parameters: word, sourceLanguage, or targetLanguage');
     }
@@ -91,7 +91,7 @@ serve(async (req: Request) => {
       console.error('Gemini API Error:', errorDetails);
       throw new Error(`Gemini API request failed with status ${geminiResponse.status}. Details: ${errorDetails}`);
     }
-
+    
     const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!rawText) {
       const errorDetails = JSON.stringify(geminiData, null, 2);
