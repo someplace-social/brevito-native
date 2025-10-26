@@ -37,10 +37,8 @@ export default function SettingsScreen() {
   const [stagedCategories, setStagedCategories] = useState(selectedCategories);
   const [stagedFontSize, setStagedFontSize] = useState(fontSize);
   const [stagedShowImages, setStagedShowImages] = useState(showImages);
-  const [stagedTheme, setStagedTheme] = useState(theme);
 
   const handleSaveChanges = () => {
-    // Theme is saved instantly, so we exclude it from this check.
     const hasChanges =
       stagedContentLanguage !== contentLanguage ||
       stagedTranslationLanguage !== translationLanguage ||
@@ -103,8 +101,7 @@ export default function SettingsScreen() {
               setStagedFontSize={setStagedFontSize}
               stagedShowImages={stagedShowImages}
               setStagedShowImages={setStagedShowImages}
-              stagedTheme={stagedTheme}
-              setStagedTheme={setStagedTheme}
+              stagedTheme={theme}
               setGlobalTheme={setTheme}
             />
           )}
