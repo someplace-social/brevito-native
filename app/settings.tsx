@@ -79,11 +79,9 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          {activeView !== 'main' && (
-            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-              <IconSymbol name={'arrow.left'} size={24} color={colors.foreground} />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity onPress={activeView === 'main' ? handleClose : handleBack} style={styles.backButton}>
+            <IconSymbol name={'arrow.left'} size={24} color={colors.foreground} />
+          </TouchableOpacity>
           <Text style={[styles.title, { color: colors.foreground }]}>{viewTitles[activeView]}</Text>
           <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <IconSymbol name="xmark" size={24} color={colors.foreground} />
