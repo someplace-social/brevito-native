@@ -1,13 +1,15 @@
 import { ColorTheme } from '@/constants/Colors';
-import { useWordAnalysis } from '@/hooks/useWordAnalysis';
+import { MeaningAnalysis, useWordAnalysis } from '@/hooks/useWordAnalysis';
 import React, { useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   Modal,
   SafeAreaView,
   ScrollView,
+  StyleProp,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -22,7 +24,7 @@ type WordAnalysisDrawerProps = {
   colors: ColorTheme;
 };
 
-const UnderlinedSentence = ({ sentence, word, style }: { sentence: string; word: string; style: any }) => {
+const UnderlinedSentence = ({ sentence, word, style }: { sentence: string; word: string; style: StyleProp<TextStyle> }) => {
   if (!word || !sentence) return <Text>{sentence}</Text>;
   const parts = sentence.split(new RegExp(`(${word})`, 'gi'));
   return (
@@ -167,7 +169,7 @@ export function WordAnalysisDrawer({
   }), [colors]);
 
   return (
-    <Modal animationType="slide" transparent={true} visible={isOpen} onRequestClose={onClose}>
+    <Modal animationType="slide" transparent visible={isOpen} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.header}>
@@ -191,7 +193,7 @@ export function WordAnalysisDrawer({
                     <Text style={styles.rootWordText}>{analysis.rootWord}</Text>
                   </View>
                 )}
-                {analysis.analysis?.map((item, index) => (
+                {analysis.analysis?.map((item: MeaningAnalysis, index: number) => (
                   <View key={index} style={styles.meaningBlock}>
                     <Text style={styles.translationText}>{item.translation}</Text>
                     <Text style={styles.posText}>{item.partOfSpeech}</Text>

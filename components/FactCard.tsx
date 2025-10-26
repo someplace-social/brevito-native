@@ -3,7 +3,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { useFactContent } from '@/hooks/useFactContent';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
@@ -66,8 +66,8 @@ export function FactCard({
 
   const handleWordSelect = (word: string, wordRef: React.RefObject<View | null>) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    cardRef.current?.measure((fx, fy, width, height, px, py) => {
-      wordRef.current?.measure((wfx, wfy, wWidth, wHeight, wpx, wpy) => {
+    cardRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
+      wordRef.current?.measure((_wfx, _wfy, _wWidth, wHeight, wpx, wpy) => {
         setPopoverState({
           isVisible: true,
           selectedWord: word,
