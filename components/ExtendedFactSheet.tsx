@@ -221,21 +221,20 @@ export function ExtendedFactSheet({
                     </Text>
                   )}
                   {data.content && (
-                    <Pressable onPressOut={handlePressOut}>
-                      {/* @ts-ignore */}
-                      <TextInput
-                        value={data.content}
-                        multiline
-                        onSelectionChange={handleSelectionChange}
-                        style={[styles.contentText, { fontSize }]}
-                        scrollEnabled={false}
-                        contextMenuHidden
-                        editable={Platform.OS !== 'ios'}
-                        selectable
-                        caretHidden={Platform.OS !== 'ios'}
-                        showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
-                      />
-                    </Pressable>
+                    <TextInput
+                      // @ts-ignore
+                      value={data.content}
+                      multiline
+                      onSelectionChange={handleSelectionChange}
+                      onPressOut={handlePressOut}
+                      style={[styles.contentText, { fontSize }]}
+                      scrollEnabled={false}
+                      contextMenuHidden
+                      editable={Platform.OS !== 'ios'}
+                      selectable
+                      caretHidden={Platform.OS !== 'ios'}
+                      showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
+                    />
                   )}
                   {data.source && data.source_url && (
                     <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>

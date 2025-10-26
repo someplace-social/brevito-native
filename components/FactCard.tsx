@@ -204,21 +204,20 @@ export function FactCard({
             {isLoading && <ActivityIndicator color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {content && (
-              <Pressable onPressOut={handlePressOut}>
-                {/* @ts-ignore */}
-                <TextInput
-                  value={content}
-                  multiline
-                  onSelectionChange={handleSelectionChange}
-                  style={[styles.contentText, { fontSize }]}
-                  scrollEnabled={false}
-                  contextMenuHidden
-                  editable={Platform.OS !== 'ios'}
-                  selectable
-                  caretHidden={Platform.OS !== 'ios'}
-                  showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
-                />
-              </Pressable>
+              <TextInput
+                // @ts-ignore
+                value={content}
+                multiline
+                onSelectionChange={handleSelectionChange}
+                onPressOut={handlePressOut}
+                style={[styles.contentText, { fontSize }]}
+                scrollEnabled={false}
+                contextMenuHidden
+                editable={Platform.OS !== 'ios'}
+                selectable
+                caretHidden={Platform.OS !== 'ios'}
+                showSoftInputOnFocus={Platform.OS === 'ios' ? undefined : false}
+              />
             )}
           </View>
           <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
