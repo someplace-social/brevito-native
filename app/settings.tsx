@@ -3,7 +3,7 @@ import { Colors } from '@/constants/Colors';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AppearanceView } from '../components/options/AppearanceView';
 import { LanguageView } from '../components/options/LanguageView';
 import { MainView } from '../components/options/MainView';
@@ -120,14 +120,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    paddingTop: Platform.OS === 'android' ? 24 : 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
   },
   backButton: {
     position: 'absolute',
     left: 16,
-    top: 16,
+    top: Platform.OS === 'android' ? 24 : 16,
     zIndex: 1,
   },
   title: {

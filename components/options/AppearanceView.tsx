@@ -1,11 +1,20 @@
-import { StyleSheet, Switch, Text, View } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { Image } from 'expo-image';
-import { FontSizeStepper } from '../ui/FontSizeStepper';
 import { FONT_SIZES } from '@/hooks/useAppSettings';
+import { Image } from 'expo-image';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import { CustomPicker } from '../ui/CustomPicker';
+import { FontSizeStepper } from '../ui/FontSizeStepper';
 
-const themeItems = [{ label: 'Dark', value: 'dark' }];
+const themeItems = [
+  { label: 'Day', value: 'light' },
+  { label: 'Night', value: 'dark' },
+  { label: 'Honey', value: 'theme-honey' },
+  { label: 'Sage', value: 'theme-sage' },
+  { label: 'Eggplant', value: 'theme-eggplant' },
+  { label: 'Brick', value: 'theme-brick' },
+  { label: 'River', value: 'theme-river' },
+  { label: 'Granite', value: 'theme-granite' },
+];
 
 type AppearanceViewProps = {
   stagedFontSize: number;
@@ -53,8 +62,8 @@ export function AppearanceView({
         </View>
         <CustomPicker
           label="Theme"
-          selectedValue="dark"
-          onValueChange={() => {}}
+          selectedValue="dark" // This is a placeholder; full theme switching is not yet implemented
+          onValueChange={() => {}} // Placeholder
           items={themeItems}
         />
       </View>
