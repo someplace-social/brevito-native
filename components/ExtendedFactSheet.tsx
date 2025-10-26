@@ -4,12 +4,13 @@ import { useExtendedFact } from '@/hooks/useExtendedFact';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
   NativeSyntheticEvent,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -19,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
@@ -33,8 +35,11 @@ type ExtendedFactSheetProps = {
   colors: ColorTheme;
 };
 
-// Type assertion to bypass incorrect official type definitions
-const SelectableInput = TextInput as any;
+type PopoverState = {
+  isVisible: boolean;
+  position: { top: number; left: number } | null;
+  selectedWord: string;
+};
 
 export function ExtendedFactSheet({
   factId,
@@ -46,11 +51,16 @@ export function ExtendedFactSheet({
   fontSize,
   colors,
 }: ExtendedFactSheetProps) {
+  const sheetRef = useRef<View>(null);
   const { translationLanguage } = useAppSettings();
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [wordToAnalyze, setWordToAnalyze] = useState('');
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
+  const [popoverState, setPopoverState] = useState<PopoverState>({
+    isVisible: false,
+    position: null,
+    selectedWord: '',
+  });
 
   const handleOpenSource = () => {
     if (data?.source_url) {
@@ -62,20 +72,37 @@ export function ExtendedFactSheet({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handleTouchEnd = () => {
+  const handlePressOut = (event: NativeSyntheticEvent<any>) => {
     if (selection && selection.start !== selection.end && data?.content) {
       const selectedText = data.content.substring(selection.start, selection.end).trim();
       if (selectedText) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        setWordToAnalyze(selectedText);
-        setIsDrawerOpen(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        sheetRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
+          setPopoverState({
+            isVisible: true,
+            selectedWord: selectedText,
+            position: {
+              top: event.nativeEvent.pageY - py - 60, // Adjust for popover height
+              left: event.nativeEvent.pageX - px,
+            },
+          });
+        });
       }
     }
   };
 
+  const handleClosePopover = () => {
+    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+  };
+
+  const handleLearnMore = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    handleClosePopover();
+    setIsDrawerOpen(true);
+  };
+
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-    setWordToAnalyze('');
   };
 
   const styles = useMemo(() => StyleSheet.create({
@@ -133,7 +160,7 @@ export function ExtendedFactSheet({
     contentText: {
       color: colors.foreground,
       lineHeight: 28,
-      padding: 0, // Reset padding for TextInput
+      padding: 0,
       margin: 0,
     },
     sourceButton: {
@@ -177,37 +204,49 @@ export function ExtendedFactSheet({
             {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {data && (
-              <View style={styles.content}>
-                {showImages && data.image_url && (
-                  <Image source={{ uri: data.image_url }} style={styles.image} />
-                )}
-                {data.category && (
-                  <Text style={styles.categoryText}>
-                    {data.category}
-                    {data.subcategory && ` > ${data.subcategory}`}
-                  </Text>
-                )}
-                {data.content && (
-                  <SelectableInput
-                    value={data.content}
-                    editable
-                    onChangeText={() => {}}
-                    multiline
-                    selectable
-                    contextMenuHidden
-                    onSelectionChange={handleSelectionChange}
-                    onTouchEnd={handleTouchEnd}
-                    style={[styles.contentText, { fontSize }]}
-                    scrollEnabled={false}
+              <Pressable onPress={handleClosePopover}>
+                <View style={styles.content} ref={sheetRef}>
+                  {showImages && data.image_url && (
+                    <Image source={{ uri: data.image_url }} style={styles.image} />
+                  )}
+                  {data.category && (
+                    <Text style={styles.categoryText}>
+                      {data.category}
+                      {data.subcategory && ` > ${data.subcategory}`}
+                    </Text>
+                  )}
+                  {data.content && (
+                    <Pressable onPressOut={handlePressOut}>
+                      <TextInput
+                        value={data.content}
+                        editable={false}
+                        multiline
+                        selectable
+                        contextMenuHidden
+                        onSelectionChange={handleSelectionChange}
+                        style={[styles.contentText, { fontSize }]}
+                        scrollEnabled={false}
+                      />
+                    </Pressable>
+                  )}
+                  {data.source && data.source_url && (
+                    <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
+                      <Text style={styles.sourceText}>Source: {data.source}</Text>
+                      <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
+                    </TouchableOpacity>
+                  )}
+                  <TranslationPopover
+                    isVisible={popoverState.isVisible}
+                    position={popoverState.position}
+                    selectedWord={popoverState.selectedWord}
+                    contentLanguage={language}
+                    translationLanguage={translationLanguage}
+                    context={data.content}
+                    onLearnMore={handleLearnMore}
+                    colors={colors}
                   />
-                )}
-                {data.source && data.source_url && (
-                  <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
-                    <Text style={styles.sourceText}>Source: {data.source}</Text>
-                    <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
-                  </TouchableOpacity>
-                )}
-              </View>
+                </View>
+              </Pressable>
             )}
           </ScrollView>
         </SafeAreaView>
@@ -215,7 +254,7 @@ export function ExtendedFactSheet({
       <WordAnalysisDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
-        selectedText={wordToAnalyze}
+        selectedText={popoverState.selectedWord}
         sourceLanguage={language}
         targetLanguage={translationLanguage}
         context={data?.content ?? null}

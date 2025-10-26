@@ -2,10 +2,11 @@ import { ColorTheme } from '@/constants/Colors';
 import { useFactContent } from '@/hooks/useFactContent';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { TranslationPopover } from './TranslationPopover';
 import { IconSymbol } from './ui/icon-symbol';
 import { WordAnalysisDrawer } from './WordAnalysisDrawer';
 
@@ -32,8 +34,11 @@ type FactCardProps = {
   colors: ColorTheme;
 };
 
-// Type assertion to bypass incorrect official type definitions
-const SelectableInput = TextInput as any;
+type PopoverState = {
+  isVisible: boolean;
+  position: { top: number; left: number } | null;
+  selectedWord: string;
+};
 
 export function FactCard({
   factId,
@@ -50,9 +55,14 @@ export function FactCard({
   fontSize,
   colors,
 }: FactCardProps) {
+  const cardRef = useRef<View>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [wordToAnalyze, setWordToAnalyze] = useState('');
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
+  const [popoverState, setPopoverState] = useState<PopoverState>({
+    isVisible: false,
+    position: null,
+    selectedWord: '',
+  });
 
   const { content, error, isLoading } = useFactContent({
     factId,
@@ -65,20 +75,37 @@ export function FactCard({
     setSelection(event.nativeEvent.selection);
   };
 
-  const handleTouchEnd = () => {
+  const handlePressOut = (event: NativeSyntheticEvent<any>) => {
     if (selection && selection.start !== selection.end && content) {
       const selectedText = content.substring(selection.start, selection.end).trim();
       if (selectedText) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        setWordToAnalyze(selectedText);
-        setIsDrawerOpen(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        cardRef.current?.measure((_fx, _fy, _width, _height, px, py) => {
+          setPopoverState({
+            isVisible: true,
+            selectedWord: selectedText,
+            position: {
+              top: event.nativeEvent.pageY - py - 60, // Adjust for popover height
+              left: event.nativeEvent.pageX - px,
+            },
+          });
+        });
       }
     }
   };
 
+  const handleClosePopover = () => {
+    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+  };
+
+  const handleLearnMore = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    handleClosePopover();
+    setIsDrawerOpen(true);
+  };
+
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-    setWordToAnalyze('');
   };
 
   const handleCategoryPress = (cat: string) => {
@@ -122,7 +149,7 @@ export function FactCard({
     contentText: {
       color: colors.foreground,
       lineHeight: 26,
-      padding: 0, // Reset padding for TextInput
+      padding: 0,
       margin: 0,
     },
     errorText: {
@@ -146,55 +173,67 @@ export function FactCard({
   }), [colors]);
 
   return (
-    <View>
-      <View style={styles.card}>
-        {showImages && imageUrl && (
-          <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
-        )}
-        <View style={styles.contentContainer}>
-          {category && (
-            <View style={styles.categoryContainer}>
-              <TouchableOpacity onPress={() => handleCategoryPress(category)}>
-                <Text style={styles.categoryText}>{category}</Text>
-              </TouchableOpacity>
-              {subcategory && (
-                <>
-                  <Text style={styles.categoryText}> &gt; </Text>
-                  <TouchableOpacity onPress={() => handleCategoryPress(category)}>
-                    <Text style={styles.categoryText}>{subcategory}</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
+    <View ref={cardRef}>
+      <Pressable onPress={handleClosePopover}>
+        <View style={styles.card}>
+          {showImages && imageUrl && (
+            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
           )}
-          {isLoading && <ActivityIndicator color={colors.primary} />}
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {content && (
-            <SelectableInput
-              value={content}
-              editable
-              onChangeText={() => {}}
-              multiline
-              selectable
-              contextMenuHidden
-              onSelectionChange={handleSelectionChange}
-              onTouchEnd={handleTouchEnd}
-              style={[styles.contentText, { fontSize }]}
-              scrollEnabled={false}
-            />
-          )}
-        </View>
-        <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
-          <View style={styles.readMoreButton}>
-            <Text style={styles.readMoreText}>Read More</Text>
-            <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
+          <View style={styles.contentContainer}>
+            {category && (
+              <View style={styles.categoryContainer}>
+                <TouchableOpacity onPress={() => handleCategoryPress(category)}>
+                  <Text style={styles.categoryText}>{category}</Text>
+                </TouchableOpacity>
+                {subcategory && (
+                  <>
+                    <Text style={styles.categoryText}> &gt; </Text>
+                    <TouchableOpacity onPress={() => handleCategoryPress(category)}>
+                      <Text style={styles.categoryText}>{subcategory}</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            )}
+            {isLoading && <ActivityIndicator color={colors.primary} />}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            {content && (
+              <Pressable onPressOut={handlePressOut}>
+                <TextInput
+                  value={content}
+                  editable={false}
+                  multiline
+                  selectable
+                  contextMenuHidden
+                  onSelectionChange={handleSelectionChange}
+                  style={[styles.contentText, { fontSize }]}
+                  scrollEnabled={false}
+                />
+              </Pressable>
+            )}
           </View>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
+            <View style={styles.readMoreButton}>
+              <Text style={styles.readMoreText}>Read More</Text>
+              <IconSymbol name="arrow.up.right" size={12} color={colors.mutedForeground} />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </Pressable>
+      <TranslationPopover
+        isVisible={popoverState.isVisible}
+        position={popoverState.position}
+        selectedWord={popoverState.selectedWord}
+        contentLanguage={contentLanguage}
+        translationLanguage={translationLanguage}
+        context={content}
+        onLearnMore={handleLearnMore}
+        colors={colors}
+      />
       <WordAnalysisDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
-        selectedText={wordToAnalyze}
+        selectedText={popoverState.selectedWord}
         sourceLanguage={contentLanguage}
         targetLanguage={translationLanguage}
         context={content}
