@@ -1,4 +1,3 @@
-// v1.7: Add detailed logging for debugging Gemini API response
 import { serve } from 'http';
 import { createClient } from 'supabase';
 
@@ -76,7 +75,7 @@ serve(async (req: Request) => {
     `;
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${genAIKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genAIKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +100,8 @@ serve(async (req: Request) => {
     try {
       newAnalysis = JSON.parse(rawText.trim().replace(/```json|```/g, ''));
     } catch (parseError) {
-      console.error('[PARSE_ERROR] Failed to parse Gemini response:', parseError.message);
+      const message = parseError instanceof Error ? parseError.message : 'Unknown parsing error';
+      console.error('[PARSE_ERROR] Failed to parse Gemini response:', message);
       throw new Error(`Failed to parse JSON from Gemini response. Raw text: ${rawText}`);
     }
 

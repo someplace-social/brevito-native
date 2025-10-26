@@ -40,6 +40,7 @@ export function useWordAnalysis({
       console.log(`[useWordAnalysis] Starting fetch for: "${word}"`);
       setIsLoading(true);
       setError(null);
+      setAnalysis(null);
       try {
         console.log('[useWordAnalysis] Invoking supabase function "analyze-word"...');
         const { data, error: invokeError } = await supabase.functions.invoke('analyze-word', {
@@ -50,15 +51,12 @@ export function useWordAnalysis({
         console.log('[useWordAnalysis] Invoke response data:', data);
 
         if (invokeError) throw invokeError;
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
+        if (data.error) throw new Error(data.error);
 
         if (data && Array.isArray(data.analysis) && data.analysis.length > 0) {
           setAnalysis(data as WordAnalysisData);
         } else {
-          throw new Error("Sorry, we couldn't find a detailed analysis for this word.");
+          setError("Sorry, we couldn't find a detailed analysis for this word.");
         }
       } catch (err: any) {
         console.error('[useWordAnalysis] Fetch error:', err);
