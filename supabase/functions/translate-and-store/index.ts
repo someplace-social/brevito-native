@@ -1,7 +1,6 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from 'http';
+import { createClient } from 'supabase';
 
-// Define the structure of the DeepL API response
 interface DeepLResponse {
   translations: {
     detected_source_language: string;
@@ -9,14 +8,12 @@ interface DeepLResponse {
   }[];
 }
 
-// CORS headers for preflight and response
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -29,7 +26,6 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
-    // 1. Check if translation already exists in the database
     const { data: existingTranslation, error: selectError } = await supabaseClient
       .from('word_translations')
       .select('translation')
@@ -47,7 +43,6 @@ serve(async (req) => {
       });
     }
 
-    // 2. If not, call DeepL API
     const deepLKey = Deno.env.get('DEEPL_API_KEY');
     if (!deepLKey) throw new Error('DeepL API key not found.');
 
@@ -82,7 +77,6 @@ serve(async (req) => {
 
     const translationPayload = { primaryTranslation };
 
-    // 3. Store the new translation in the database
     const { error: insertError } = await supabaseClient
       .from('word_translations')
       .insert({
@@ -94,20 +88,19 @@ serve(async (req) => {
       });
 
     if (insertError) {
-      // It's possible another user requested the same word. Ignore duplicate errors.
       if (insertError.code !== '23505') { 
         throw insertError;
       }
     }
 
-    // 4. Return the new translation to the client
     return new Response(JSON.stringify(translationPayload), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
     });
