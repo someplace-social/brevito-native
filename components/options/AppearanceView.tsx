@@ -3,7 +3,7 @@ import { FONT_SIZES, useAppSettings } from '@/hooks/useAppSettings';
 import { Image } from 'expo-image';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { CustomPicker } from '../ui/CustomPicker';
-import { FontSizeStepper } from '../ui/FontSizeStepper';
+import { FontSizeSlider } from '../ui/FontSizeSlider';
 
 const themeItems = [
   { label: 'Day', value: 'light' },
@@ -52,7 +52,7 @@ export function AppearanceView({
       </View>
 
       <View style={styles.controls}>
-        <FontSizeStepper
+        <FontSizeSlider
           currentSize={stagedFontSize}
           onSizeChange={setStagedFontSize}
           sizeOptions={FONT_SIZES}
