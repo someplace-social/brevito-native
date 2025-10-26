@@ -1,5 +1,4 @@
 {
-  "compilerOptions": {
-    "unstable": true
-  }
+  "compilerOptions": {},
+  "unstable": true
 }
