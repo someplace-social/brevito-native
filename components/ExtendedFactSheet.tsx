@@ -10,12 +10,11 @@ import {
   Modal,
   NativeSyntheticEvent,
   Platform,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TextSelectionChangeEventData,
+  TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -55,7 +54,7 @@ export function ExtendedFactSheet({
     }
   };
 
-  const handleSelectionChange = (event: NativeSyntheticEvent<TextSelectionChangeEventData>) => {
+  const handleSelectionChange = (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
     setSelection(event.nativeEvent.selection);
   };
 
@@ -184,14 +183,14 @@ export function ExtendedFactSheet({
                   </Text>
                 )}
                 {data.content && (
-                  <Pressable onPressOut={handlePressOut}>
-                    <Text
-                      selectable
-                      onSelectionChange={handleSelectionChange}
-                      style={[styles.contentText, { fontSize }]}>
-                      {data.content}
-                    </Text>
-                  </Pressable>
+                  // @ts-ignore - onSelectionChange is a valid prop but is missing from the official Text component types.
+                  <Text
+                    selectable
+                    onPressOut={handlePressOut}
+                    onSelectionChange={handleSelectionChange}
+                    style={[styles.contentText, { fontSize }]}>
+                    {data.content}
+                  </Text>
                 )}
                 {data.source && data.source_url && (
                   <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>

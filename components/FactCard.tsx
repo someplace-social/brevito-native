@@ -6,10 +6,9 @@ import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
-  Pressable,
   StyleSheet,
   Text,
-  TextSelectionChangeEventData,
+  TextInputSelectionChangeEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -58,7 +57,7 @@ export function FactCard({
     isIntersecting,
   });
 
-  const handleSelectionChange = (event: NativeSyntheticEvent<TextSelectionChangeEventData>) => {
+  const handleSelectionChange = (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
     setSelection(event.nativeEvent.selection);
   };
 
@@ -166,14 +165,14 @@ export function FactCard({
           {isLoading && <ActivityIndicator color={colors.primary} />}
           {error && <Text style={styles.errorText}>{error}</Text>}
           {content && (
-            <Pressable onPressOut={handlePressOut}>
-              <Text
-                selectable
-                onSelectionChange={handleSelectionChange}
-                style={[styles.contentText, { fontSize }]}>
-                {content}
-              </Text>
-            </Pressable>
+            // @ts-ignore - onSelectionChange is a valid prop but is missing from the official Text component types.
+            <Text
+              selectable
+              onPressOut={handlePressOut}
+              onSelectionChange={handleSelectionChange}
+              style={[styles.contentText, { fontSize }]}>
+              {content}
+            </Text>
           )}
         </View>
         <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
