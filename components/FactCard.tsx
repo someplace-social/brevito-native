@@ -197,6 +197,7 @@ export function FactCard({
     showSoftInputOnFocus: false,
     selectable: true,
     caretHidden: true,
+    cursorColor: 'transparent',
   };
 
   return (
