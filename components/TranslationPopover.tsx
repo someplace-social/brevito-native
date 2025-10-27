@@ -55,11 +55,17 @@ export function TranslationPopover({
     },
     content: {
       padding: 12,
+      gap: 4,
+    },
+    originalWordText: {
+      color: colors.mutedForeground,
+      fontSize: 16,
+      fontStyle: 'italic',
     },
     translationText: {
       color: colors.popoverForeground,
-      fontSize: 18,
-      fontWeight: '600',
+      fontSize: 20,
+      fontWeight: 'bold',
     },
     errorText: {
       color: colors.destructive,
@@ -80,7 +86,12 @@ export function TranslationPopover({
       <View style={styles.content}>
         {isLoading && <ActivityIndicator color={colors.foreground} />}
         {error && <Text style={styles.errorText}>{error}</Text>}
-        {translation && <Text style={styles.translationText}>{translation}</Text>}
+        {translation && (
+          <>
+            <Text style={styles.originalWordText}>{selectedWord}</Text>
+            <Text style={styles.translationText}>{translation}</Text>
+          </>
+        )}
       </View>
       <View style={styles.footer}>
         <Button title="Learn More" onPress={onLearnMore} color={colors.primary} />

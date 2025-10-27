@@ -7,6 +7,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   Modal,
   NativeSyntheticEvent,
   Platform,
@@ -51,7 +52,6 @@ export function ExtendedFactSheet({
   fontSize,
   colors,
 }: ExtendedFactSheetProps) {
-  const sheetRef = useRef<View>(null);
   const { translationLanguage } = useAppSettings();
   const { data, isLoading, error } = useExtendedFact({ factId, language, level });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -87,18 +87,34 @@ export function ExtendedFactSheet({
       const selectedText = data.content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        sheetRef.current?.measure((_fx, _fy, width, _height, px, py) => {
-          const popoverWidth = 200;
-          const popoverHeight = 60;
-          const touchX = event.nativeEvent.pageX;
-          const touchY = event.nativeEvent.pageY;
-          let top = touchY - py - popoverHeight - 10;
-          let left = touchX - px - popoverWidth / 2;
-          if (left + popoverWidth > width) left = width - popoverWidth - 16;
-          if (left < 0) left = 16;
-          if (top < 0) top = touchY - py + 20;
-          setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
-        });
+
+        const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+        const POPOVER_MAX_WIDTH = 250;
+        const POPOVER_ESTIMATED_HEIGHT = 100;
+        const VERTICAL_MARGIN = 10;
+        const HORIZONTAL_MARGIN = 16;
+        const HEADER_HEIGHT = Platform.OS === 'android' ? 80 : 96;
+
+        const touchX = event.nativeEvent.pageX;
+        const touchY = event.nativeEvent.pageY;
+
+        let left = touchX - POPOVER_MAX_WIDTH / 2;
+        if (left < HORIZONTAL_MARGIN) {
+          left = HORIZONTAL_MARGIN;
+        }
+        if (left + POPOVER_MAX_WIDTH > screenWidth - HORIZONTAL_MARGIN) {
+          left = screenWidth - POPOVER_MAX_WIDTH - HORIZONTAL_MARGIN;
+        }
+
+        let top = touchY - POPOVER_ESTIMATED_HEIGHT - VERTICAL_MARGIN;
+        if (top < HEADER_HEIGHT) {
+          top = touchY + 20;
+        }
+        if (top + POPOVER_ESTIMATED_HEIGHT > screenHeight) {
+          top = screenHeight - POPOVER_ESTIMATED_HEIGHT - VERTICAL_MARGIN;
+        }
+
+        setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
       }
       lastValidSelection.current = undefined;
     } else if (popoverState.isVisible) {
@@ -206,6 +222,7 @@ export function ExtendedFactSheet({
     showSoftInputOnFocus: false,
     selectable: true,
     caretHidden: true,
+    cursorColor: 'transparent',
   };
 
   return (
@@ -232,7 +249,7 @@ export function ExtendedFactSheet({
             {error && <Text style={styles.errorText}>{error}</Text>}
             {data && (
               <Pressable onPress={handleClosePopover}>
-                <View style={styles.content} ref={sheetRef}>
+                <View style={styles.content}>
                   {showImages && data.image_url && (
                     <Image source={{ uri: data.image_url }} style={styles.image} />
                   )}
@@ -249,21 +266,23 @@ export function ExtendedFactSheet({
                       <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
                     </TouchableOpacity>
                   )}
-                  <TranslationPopover
-                    isVisible={popoverState.isVisible}
-                    position={popoverState.position}
-                    selectedWord={popoverState.selectedWord}
-                    contentLanguage={language}
-                    translationLanguage={translationLanguage}
-                    context={data.content}
-                    onLearnMore={handleLearnMore}
-                    colors={colors}
-                  />
                 </View>
               </Pressable>
             )}
           </ScrollView>
         </SafeAreaView>
+        {data && (
+          <TranslationPopover
+            isVisible={popoverState.isVisible}
+            position={popoverState.position}
+            selectedWord={popoverState.selectedWord}
+            contentLanguage={language}
+            translationLanguage={translationLanguage}
+            context={data.content}
+            onLearnMore={handleLearnMore}
+            colors={colors}
+          />
+        )}
       </View>
       <WordAnalysisDrawer
         isOpen={isDrawerOpen}

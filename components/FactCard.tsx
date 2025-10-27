@@ -90,16 +90,34 @@ export function FactCard({
       const selectedText = content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        cardRef.current?.measure((_fx, _fy, width, _height, px, py) => {
-          const popoverWidth = 200;
-          const popoverHeight = 60;
+        cardRef.current?.measure((_fx, _fy, cardWidth, _height, cardPageX, cardPageY) => {
+          const POPOVER_MAX_WIDTH = 250;
+          const POPOVER_ESTIMATED_HEIGHT = 80;
+          const HORIZONTAL_MARGIN = 16;
+
           const touchX = event.nativeEvent.pageX;
           const touchY = event.nativeEvent.pageY;
-          let top = touchY - py - popoverHeight - 10;
-          let left = touchX - px - popoverWidth / 2;
-          if (left + popoverWidth > width) left = width - popoverWidth - 16;
-          if (left < 0) left = 16;
-          if (top < 0) top = touchY - py + 20;
+
+          const touchXInCard = touchX - cardPageX;
+          const touchYInCard = touchY - cardPageY;
+
+          let left = touchXInCard - POPOVER_MAX_WIDTH / 2;
+
+          if (left < HORIZONTAL_MARGIN) {
+            left = HORIZONTAL_MARGIN;
+          }
+          if (left + POPOVER_MAX_WIDTH > cardWidth - HORIZONTAL_MARGIN) {
+            left = cardWidth - POPOVER_MAX_WIDTH - HORIZONTAL_MARGIN;
+          }
+          if (left < HORIZONTAL_MARGIN) {
+            left = HORIZONTAL_MARGIN;
+          }
+
+          let top = touchYInCard - POPOVER_ESTIMATED_HEIGHT - 10;
+          if (top < 0) {
+            top = touchYInCard + 20;
+          }
+
           setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
         });
       }
