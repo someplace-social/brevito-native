@@ -7,7 +7,6 @@ import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Modal,
   NativeSyntheticEvent,
   Platform,
@@ -38,7 +37,6 @@ type ExtendedFactSheetProps = {
 
 type PopoverState = {
   isVisible: boolean;
-  position: { top: number; left: number } | null;
   selectedWord: string;
 };
 
@@ -58,7 +56,6 @@ export function ExtendedFactSheet({
   const lastValidSelection = useRef<{ start: number; end: number } | undefined>(undefined);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
-    position: null,
     selectedWord: '',
   });
 
@@ -76,45 +73,18 @@ export function ExtendedFactSheet({
   };
 
   const handleClosePopover = () => {
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    setPopoverState({ isVisible: false, selectedWord: '' });
     lastValidSelection.current = undefined;
   };
 
-  const handlePressOut = (event: NativeSyntheticEvent<any>) => {
+  const handlePressOut = () => {
     const finalSelection = lastValidSelection.current;
 
     if (finalSelection && finalSelection.start !== finalSelection.end && data?.content) {
       const selectedText = data.content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-        const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-        const POPOVER_MAX_WIDTH = 250;
-        const POPOVER_ESTIMATED_HEIGHT = 100;
-        const VERTICAL_MARGIN = 10;
-        const HORIZONTAL_MARGIN = 16;
-        const HEADER_HEIGHT = Platform.OS === 'android' ? 80 : 96;
-
-        const touchX = event.nativeEvent.pageX;
-        const touchY = event.nativeEvent.pageY;
-
-        let left = touchX - POPOVER_MAX_WIDTH / 2;
-        if (left < HORIZONTAL_MARGIN) {
-          left = HORIZONTAL_MARGIN;
-        }
-        if (left + POPOVER_MAX_WIDTH > screenWidth - HORIZONTAL_MARGIN) {
-          left = screenWidth - POPOVER_MAX_WIDTH - HORIZONTAL_MARGIN;
-        }
-
-        let top = touchY - POPOVER_ESTIMATED_HEIGHT - VERTICAL_MARGIN;
-        if (top < HEADER_HEIGHT) {
-          top = touchY + 20;
-        }
-        if (top + POPOVER_ESTIMATED_HEIGHT > screenHeight) {
-          top = screenHeight - POPOVER_ESTIMATED_HEIGHT - VERTICAL_MARGIN;
-        }
-
-        setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
+        setPopoverState({ isVisible: true, selectedWord: selectedText });
       }
       lastValidSelection.current = undefined;
     } else if (popoverState.isVisible) {
@@ -130,7 +100,7 @@ export function ExtendedFactSheet({
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    setPopoverState({ isVisible: false, selectedWord: '' });
     lastValidSelection.current = undefined;
   };
 
@@ -274,7 +244,6 @@ export function ExtendedFactSheet({
         {data && (
           <TranslationPopover
             isVisible={popoverState.isVisible}
-            position={popoverState.position}
             selectedWord={popoverState.selectedWord}
             contentLanguage={language}
             translationLanguage={translationLanguage}

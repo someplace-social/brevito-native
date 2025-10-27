@@ -1,16 +1,10 @@
 import { ColorTheme } from '@/constants/Colors';
 import { useWordTranslation } from '@/hooks/useWordTranslation';
 import React, { useMemo } from 'react';
-import { ActivityIndicator, Button, StyleSheet, Text, View } from 'react-native';
-
-type PopoverPosition = {
-  top: number;
-  left: number;
-};
+import { ActivityIndicator, Button, Dimensions, StyleSheet, Text, View } from 'react-native';
 
 type TranslationPopoverProps = {
   isVisible: boolean;
-  position: PopoverPosition | null;
   selectedWord: string;
   contentLanguage: string;
   translationLanguage: string;
@@ -21,7 +15,6 @@ type TranslationPopoverProps = {
 
 export function TranslationPopover({
   isVisible,
-  position,
   selectedWord,
   contentLanguage,
   translationLanguage,
@@ -40,35 +33,46 @@ export function TranslationPopover({
   const styles = useMemo(() => StyleSheet.create({
     popover: {
       position: 'absolute',
+      top: Dimensions.get('window').height * 0.1,
+      width: Dimensions.get('window').width * 0.8,
+      alignSelf: 'center',
       backgroundColor: colors.popover,
-      borderRadius: 8,
+      borderRadius: 12,
       borderWidth: 1,
       borderColor: colors.border,
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
       elevation: 5,
-      minWidth: 150,
-      maxWidth: 250,
       zIndex: 10,
     },
     content: {
-      padding: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 12,
       gap: 4,
     },
     originalWordText: {
       color: colors.mutedForeground,
-      fontSize: 16,
+      fontSize: 18,
       fontStyle: 'italic',
+      textAlign: 'center',
+    },
+    separator: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginVertical: 12,
+      marginHorizontal: 12,
     },
     translationText: {
       color: colors.popoverForeground,
-      fontSize: 20,
+      fontSize: 24,
       fontWeight: 'bold',
+      textAlign: 'center',
     },
     errorText: {
       color: colors.destructive,
+      textAlign: 'center',
     },
     footer: {
       borderTopWidth: 1,
@@ -77,18 +81,19 @@ export function TranslationPopover({
     },
   }), [colors]);
 
-  if (!isVisible || !position) {
+  if (!isVisible) {
     return null;
   }
 
   return (
-    <View style={[styles.popover, { top: position.top, left: position.left }]}>
+    <View style={styles.popover}>
       <View style={styles.content}>
         {isLoading && <ActivityIndicator color={colors.foreground} />}
         {error && <Text style={styles.errorText}>{error}</Text>}
         {translation && (
           <>
             <Text style={styles.originalWordText}>{selectedWord}</Text>
+            <View style={styles.separator} />
             <Text style={styles.translationText}>{translation}</Text>
           </>
         )}

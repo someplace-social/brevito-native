@@ -36,7 +36,6 @@ type FactCardProps = {
 
 type PopoverState = {
   isVisible: boolean;
-  position: { top: number; left: number } | null;
   selectedWord: string;
 };
 
@@ -55,12 +54,10 @@ export function FactCard({
   fontSize,
   colors,
 }: FactCardProps) {
-  const cardRef = useRef<View>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const lastValidSelection = useRef<{ start: number; end: number } | undefined>(undefined);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     isVisible: false,
-    position: null,
     selectedWord: '',
   });
 
@@ -79,47 +76,18 @@ export function FactCard({
   };
 
   const handleClosePopover = () => {
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    setPopoverState({ isVisible: false, selectedWord: '' });
     lastValidSelection.current = undefined;
   };
 
-  const handlePressOut = (event: NativeSyntheticEvent<any>) => {
+  const handlePressOut = () => {
     const finalSelection = lastValidSelection.current;
 
     if (finalSelection && finalSelection.start !== finalSelection.end && content) {
       const selectedText = content.substring(finalSelection.start, finalSelection.end).trim();
       if (selectedText) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        cardRef.current?.measure((_fx, _fy, cardWidth, _height, cardPageX, cardPageY) => {
-          const POPOVER_MAX_WIDTH = 250;
-          const POPOVER_ESTIMATED_HEIGHT = 80;
-          const HORIZONTAL_MARGIN = 16;
-
-          const touchX = event.nativeEvent.pageX;
-          const touchY = event.nativeEvent.pageY;
-
-          const touchXInCard = touchX - cardPageX;
-          const touchYInCard = touchY - cardPageY;
-
-          let left = touchXInCard - POPOVER_MAX_WIDTH / 2;
-
-          if (left < HORIZONTAL_MARGIN) {
-            left = HORIZONTAL_MARGIN;
-          }
-          if (left + POPOVER_MAX_WIDTH > cardWidth - HORIZONTAL_MARGIN) {
-            left = cardWidth - POPOVER_MAX_WIDTH - HORIZONTAL_MARGIN;
-          }
-          if (left < HORIZONTAL_MARGIN) {
-            left = HORIZONTAL_MARGIN;
-          }
-
-          let top = touchYInCard - POPOVER_ESTIMATED_HEIGHT - 10;
-          if (top < 0) {
-            top = touchYInCard + 20;
-          }
-
-          setPopoverState({ isVisible: true, selectedWord: selectedText, position: { top, left } });
-        });
+        setPopoverState({ isVisible: true, selectedWord: selectedText });
       }
       lastValidSelection.current = undefined;
     } else if (popoverState.isVisible) {
@@ -135,7 +103,7 @@ export function FactCard({
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-    setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    setPopoverState({ isVisible: false, selectedWord: '' });
     lastValidSelection.current = undefined;
   };
 
@@ -219,7 +187,7 @@ export function FactCard({
   };
 
   return (
-    <View ref={cardRef}>
+    <View>
       <Pressable onPress={handleClosePopover}>
         <View style={styles.card}>
           {showImages && imageUrl && (
@@ -255,7 +223,6 @@ export function FactCard({
       </Pressable>
       <TranslationPopover
         isVisible={popoverState.isVisible}
-        position={popoverState.position}
         selectedWord={popoverState.selectedWord}
         contentLanguage={contentLanguage}
         translationLanguage={translationLanguage}
