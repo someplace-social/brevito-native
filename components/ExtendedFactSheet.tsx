@@ -10,7 +10,6 @@ import {
   Modal,
   NativeSyntheticEvent,
   Platform,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -87,8 +86,6 @@ export function ExtendedFactSheet({
         setPopoverState({ isVisible: true, selectedWord: selectedText });
       }
       lastValidSelection.current = undefined;
-    } else if (popoverState.isVisible) {
-      handleClosePopover();
     }
   };
 
@@ -218,26 +215,24 @@ export function ExtendedFactSheet({
             {isLoading && <ActivityIndicator size="large" color={colors.primary} />}
             {error && <Text style={styles.errorText}>{error}</Text>}
             {data && (
-              <Pressable onPress={handleClosePopover}>
-                <View style={styles.content}>
-                  {showImages && data.image_url && (
-                    <Image source={{ uri: data.image_url }} style={styles.image} />
-                  )}
-                  {data.category && (
-                    <Text style={styles.categoryText}>
-                      {data.category}
-                      {data.subcategory && ` > ${data.subcategory}`}
-                    </Text>
-                  )}
-                  {data.content && <TextInput {...(textInputProps as any)} />}
-                  {data.source && data.source_url && (
-                    <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
-                      <Text style={styles.sourceText}>Source: {data.source}</Text>
-                      <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </Pressable>
+              <View style={styles.content}>
+                {showImages && data.image_url && (
+                  <Image source={{ uri: data.image_url }} style={styles.image} />
+                )}
+                {data.category && (
+                  <Text style={styles.categoryText}>
+                    {data.category}
+                    {data.subcategory && ` > ${data.subcategory}`}
+                  </Text>
+                )}
+                {data.content && <TextInput {...(textInputProps as any)} />}
+                {data.source && data.source_url && (
+                  <TouchableOpacity onPress={handleOpenSource} style={styles.sourceButton}>
+                    <Text style={styles.sourceText}>Source: {data.source}</Text>
+                    <IconSymbol name="arrow.up.right" size={14} color={colors.mutedForeground} />
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
           </ScrollView>
         </SafeAreaView>
@@ -249,6 +244,7 @@ export function ExtendedFactSheet({
             translationLanguage={translationLanguage}
             context={data.content}
             onLearnMore={handleLearnMore}
+            onClose={handleClosePopover}
             colors={colors}
           />
         )}

@@ -1,7 +1,16 @@
 import { ColorTheme } from '@/constants/Colors';
 import { useWordTranslation } from '@/hooks/useWordTranslation';
 import React, { useMemo } from 'react';
-import { ActivityIndicator, Button, Dimensions, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 type TranslationPopoverProps = {
   isVisible: boolean;
@@ -10,6 +19,7 @@ type TranslationPopoverProps = {
   translationLanguage: string;
   context: string | null;
   onLearnMore: () => void;
+  onClose: () => void;
   colors: ColorTheme;
 };
 
@@ -20,6 +30,7 @@ export function TranslationPopover({
   translationLanguage,
   context,
   onLearnMore,
+  onClose,
   colors,
 }: TranslationPopoverProps) {
   const { translation, isLoading, error } = useWordTranslation({
@@ -31,9 +42,13 @@ export function TranslationPopover({
   });
 
   const styles = useMemo(() => StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.2)',
+      justifyContent: 'flex-start',
+      paddingTop: 96,
+    },
     popover: {
-      position: 'absolute',
-      top: Dimensions.get('window').height * 0.1,
       width: Dimensions.get('window').width * 0.8,
       alignSelf: 'center',
       backgroundColor: colors.popover,
@@ -45,30 +60,29 @@ export function TranslationPopover({
       shadowOpacity: 0.1,
       shadowRadius: 8,
       elevation: 5,
-      zIndex: 10,
+      overflow: 'hidden',
     },
     content: {
       paddingVertical: 16,
-      paddingHorizontal: 12,
+      paddingHorizontal: 16,
       gap: 4,
     },
     originalWordText: {
       color: colors.mutedForeground,
       fontSize: 18,
       fontStyle: 'italic',
-      textAlign: 'center',
+      textAlign: 'left',
     },
     separator: {
       height: 1,
       backgroundColor: colors.border,
       marginVertical: 12,
-      marginHorizontal: 12,
     },
     translationText: {
       color: colors.popoverForeground,
       fontSize: 24,
       fontWeight: 'bold',
-      textAlign: 'center',
+      textAlign: 'left',
     },
     errorText: {
       color: colors.destructive,
@@ -77,30 +91,48 @@ export function TranslationPopover({
     footer: {
       borderTopWidth: 1,
       borderTopColor: colors.border,
-      padding: 4,
+    },
+    learnMoreButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 12,
+    },
+    learnMoreButtonText: {
+      color: colors.primaryForeground,
+      fontWeight: '600',
+      fontSize: 16,
+      textAlign: 'center',
     },
   }), [colors]);
 
-  if (!isVisible) {
-    return null;
-  }
-
   return (
-    <View style={styles.popover}>
-      <View style={styles.content}>
-        {isLoading && <ActivityIndicator color={colors.foreground} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        {translation && (
-          <>
-            <Text style={styles.originalWordText}>{selectedWord}</Text>
-            <View style={styles.separator} />
-            <Text style={styles.translationText}>{translation}</Text>
-          </>
-        )}
-      </View>
-      <View style={styles.footer}>
-        <Button title="Learn More" onPress={onLearnMore} color={colors.primary} />
-      </View>
-    </View>
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <Pressable style={styles.modalOverlay} onPress={onClose}>
+        <Pressable>
+          <View style={styles.popover}>
+            <View style={styles.content}>
+              {isLoading && <ActivityIndicator color={colors.foreground} />}
+              {error && <Text style={styles.errorText}>{error}</Text>}
+              {translation && (
+                <>
+                  <Text style={styles.originalWordText}>{selectedWord}</Text>
+                  <View style={styles.separator} />
+                  <Text style={styles.translationText}>{translation}</Text>
+                </>
+              )}
+            </View>
+            <View style={styles.footer}>
+              <TouchableOpacity onPress={onLearnMore} style={styles.learnMoreButton}>
+                <Text style={styles.learnMoreButtonText}>Learn More</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }

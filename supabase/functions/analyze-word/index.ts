@@ -58,7 +58,6 @@ serve(async (req: Request) => {
     const prompt = `
       Analyze the word "${word}" from the language "${sourceLanguage}". 
       Provide a detailed analysis for a person learning "${targetLanguage}".
-      The response must be a single, minified JSON object with no markdown formatting.
       The JSON object must have this exact structure:
       {
         "rootWord": "The root or infinitive form of the word, if different. Otherwise, the original word.",
@@ -74,12 +73,19 @@ serve(async (req: Request) => {
       If there are multiple common meanings (e.g., noun and verb), include a separate object for each in the "analysis" array.
     `;
 
+    const requestBody = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
+    };
+
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${genAIKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        body: JSON.stringify(requestBody),
       }
     );
 
@@ -98,7 +104,7 @@ serve(async (req: Request) => {
 
     let newAnalysis: WordAnalysis;
     try {
-      newAnalysis = JSON.parse(rawText.trim().replace(/```json|```/g, ''));
+      newAnalysis = JSON.parse(rawText);
     } catch (parseError) {
       const message = parseError instanceof Error ? parseError.message : 'Unknown parsing error';
       console.error('[PARSE_ERROR] Failed to parse Gemini response:', message);

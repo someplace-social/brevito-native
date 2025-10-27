@@ -90,8 +90,6 @@ export function FactCard({
         setPopoverState({ isVisible: true, selectedWord: selectedText });
       }
       lastValidSelection.current = undefined;
-    } else if (popoverState.isVisible) {
-      handleClosePopover();
     }
   };
 
@@ -228,6 +226,7 @@ export function FactCard({
         translationLanguage={translationLanguage}
         context={content}
         onLearnMore={handleLearnMore}
+        onClose={handleClosePopover}
         colors={colors}
       />
       <WordAnalysisDrawer
