@@ -6,7 +6,6 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   NativeSyntheticEvent,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -81,6 +80,7 @@ export function FactCard({
 
   const handleClosePopover = () => {
     setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    lastValidSelection.current = undefined;
   };
 
   const handlePressOut = (event: NativeSyntheticEvent<any>) => {
@@ -118,6 +118,7 @@ export function FactCard({
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    lastValidSelection.current = undefined;
   };
 
   const handleCategoryPress = (cat: string) => {
@@ -192,7 +193,7 @@ export function FactCard({
     style: [styles.contentText, { fontSize }],
     scrollEnabled: false,
     contextMenuHidden: true,
-    editable: Platform.OS === 'android' && !popoverState.isVisible,
+    editable: true,
     showSoftInputOnFocus: false,
     selectable: true,
     caretHidden: true,
@@ -254,4 +255,4 @@ export function FactCard({
       />
     </View>
   );
-} 
+}

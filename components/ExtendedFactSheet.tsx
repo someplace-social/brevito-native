@@ -77,6 +77,7 @@ export function ExtendedFactSheet({
 
   const handleClosePopover = () => {
     setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    lastValidSelection.current = undefined;
   };
 
   const handlePressOut = (event: NativeSyntheticEvent<any>) => {
@@ -114,6 +115,7 @@ export function ExtendedFactSheet({
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setPopoverState({ isVisible: false, position: null, selectedWord: '' });
+    lastValidSelection.current = undefined;
   };
 
   const styles = useMemo(() => StyleSheet.create({
@@ -200,7 +202,7 @@ export function ExtendedFactSheet({
     style: [styles.contentText, { fontSize }],
     scrollEnabled: false,
     contextMenuHidden: true,
-    editable: Platform.OS === 'android' && !popoverState.isVisible,
+    editable: true,
     showSoftInputOnFocus: false,
     selectable: true,
     caretHidden: true,
