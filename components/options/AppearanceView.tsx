@@ -6,14 +6,16 @@ import { CustomPicker } from '../ui/CustomPicker';
 import { FontSizeSlider } from '../ui/FontSizeSlider';
 
 const themeItems = [
-  { label: 'Day', value: 'light' },
-  { label: 'Night', value: 'dark' },
-  { label: 'Honey', value: 'theme-honey' },
-  { label: 'Sage', value: 'theme-sage' },
-  { label: 'Eggplant', value: 'theme-eggplant' },
-  { label: 'Brick', value: 'theme-brick' },
-  { label: 'River', value: 'theme-river' },
-  { label: 'Granite', value: 'theme-granite' },
+  { label: 'Red', value: 'red' },
+  { label: 'Orange', value: 'orange' },
+  { label: 'Yellow', value: 'yellow' },
+  { label: 'Green', value: 'green' },
+  { label: 'Blue', value: 'blue' },
+  { label: 'Purple', value: 'purple' },
+  { label: 'Pink', value: 'pink' },
+  { label: 'Black', value: 'black' },
+  { label: 'White', value: 'white' },
+  { label: 'Brown', value: 'brown' },
 ];
 
 type AppearanceViewProps = {

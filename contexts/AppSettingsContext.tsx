@@ -34,7 +34,7 @@ export const AppSettingsProvider = ({ children }: { children: ReactNode }) => {
   const [fontSize, setFontSize] = useState<number>(18);
   const [selectedCategories, setSelectedCategories] = useState(AVAILABLE_CATEGORIES);
   const [showImages, setShowImages] = useState(true);
-  const [theme, setTheme] = useState<ThemeName>('dark');
+  const [theme, setTheme] = useState<ThemeName>('black');
   const [isInitialized, setIsInitialized] = useState(false);
   const [settingsKey, setSettingsKey] = useState(0);
 
