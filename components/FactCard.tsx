@@ -4,7 +4,6 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   NativeSyntheticEvent,
   Pressable,
   StyleSheet,
@@ -122,7 +121,6 @@ export function FactCard({
       borderWidth: 1,
       borderColor: colors.border,
       overflow: 'hidden',
-      minHeight: 100,
     },
     image: {
       width: '100%',
@@ -167,7 +165,15 @@ export function FactCard({
       color: colors.mutedForeground,
       fontSize: 14,
     },
-  }), [colors]);
+    placeholderContainer: {
+      gap: 12,
+    },
+    placeholderLine: {
+      height: fontSize,
+      backgroundColor: colors.muted,
+      borderRadius: 4,
+    },
+  }), [colors, fontSize]);
 
   const textInputProps = {
     value: content,
@@ -182,6 +188,23 @@ export function FactCard({
     selectable: true,
     caretHidden: true,
     cursorColor: 'transparent',
+  };
+
+  const renderContent = () => {
+    if (error) {
+      return <Text style={styles.errorText}>{error}</Text>;
+    }
+    if (content) {
+      return <TextInput {...(textInputProps as any)} />;
+    }
+    return (
+      <View style={styles.placeholderContainer}>
+        <View style={[styles.placeholderLine, { width: '90%' }]} />
+        <View style={[styles.placeholderLine, { width: '80%' }]} />
+        <View style={[styles.placeholderLine, { width: '95%' }]} />
+        <View style={[styles.placeholderLine, { width: '60%' }]} />
+      </View>
+    );
   };
 
   return (
@@ -207,9 +230,7 @@ export function FactCard({
                 )}
               </View>
             )}
-            {isLoading && <ActivityIndicator color={colors.primary} />}
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            {content && <TextInput {...(textInputProps as any)} />}
+            {renderContent()}
           </View>
           <TouchableOpacity onPress={handleReadMorePress} style={styles.footerContainer}>
             <View style={styles.readMoreButton}>
