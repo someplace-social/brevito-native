@@ -40,8 +40,23 @@ export default function HomeScreen() {
   const [extendedFactId, setExtendedFactId] = useState<string | null>(null);
 
   const onViewableItemsChanged = useCallback(({ viewableItems: items }: { viewableItems: ViewToken[] }) => {
-    setViewableItems(items.map((item) => item.key as string));
+    setViewableItems(items.filter((item) => item.isViewable).map((item) => item.key as string));
   }, []);
+
+  const itemsToPreload = useMemo(() => {
+    if (viewableItems.length === 0 || facts.length === 0) {
+      return [];
+    }
+    const lastViewableItemId = viewableItems[viewableItems.length - 1];
+    const lastViewableIndex = facts.findIndex(fact => fact.id === lastViewableItemId);
+
+    if (lastViewableIndex !== -1) {
+      return facts
+        .slice(lastViewableIndex + 1, lastViewableIndex + 1 + 3) // Preload next 3
+        .map(fact => fact.id);
+    }
+    return [];
+  }, [viewableItems, facts]);
 
   const viewabilityConfig = { itemVisiblePercentThreshold: 50 };
   const viewabilityConfigCallbackPairs = useRef([{ viewabilityConfig, onViewableItemsChanged }]);
@@ -170,7 +185,7 @@ export default function HomeScreen() {
                 subcategory={item.subcategory}
                 imageUrl={item.image_url}
                 showImages={showImages}
-                isIntersecting={viewableItems.includes(item.id)}
+                isIntersecting={viewableItems.includes(item.id) || itemsToPreload.includes(item.id)}
                 contentLanguage={contentLanguage}
                 translationLanguage={translationLanguage}
                 level={level}
@@ -183,7 +198,7 @@ export default function HomeScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
             onEndReached={loadMore}
-            onEndReachedThreshold={0.5}
+            onEndReachedThreshold={1.5}
             ListFooterComponent={renderFooter}
             viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
           />
