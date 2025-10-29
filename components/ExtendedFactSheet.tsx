@@ -190,6 +190,9 @@ export function ExtendedFactSheet({
     selectable: true,
     caretHidden: true,
     cursorColor: 'transparent',
+    autoFocus: false,
+    spellCheck: false,
+    autoCorrect: false,
   };
 
   return (

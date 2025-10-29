@@ -188,6 +188,9 @@ export function FactCard({
     selectable: true,
     caretHidden: true,
     cursorColor: 'transparent',
+    autoFocus: false,
+    spellCheck: false,
+    autoCorrect: false,
   };
 
   const renderContent = () => {
