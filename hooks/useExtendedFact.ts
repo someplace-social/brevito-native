@@ -8,6 +8,7 @@ type ExtendedFactData = {
   image_url: string | null;
   category: string | null;
   subcategory: string | null;
+  image_credit: string | null;
 };
 
 type UseExtendedFactProps = {
@@ -44,7 +45,7 @@ export function useExtendedFact({ factId, language, level }: UseExtendedFactProp
 
         const { data: ogFactData, error: ogFactError } = await supabase
           .from('og_facts')
-          .select('source, source_url, image_url, category, subcategory')
+          .select('source, source_url, image_url, category, subcategory, image_credit')
           .eq('id', factId)
           .single();
 

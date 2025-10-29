@@ -175,6 +175,20 @@ export function ExtendedFactSheet({
       color: colors.destructive,
       textAlign: 'center',
     },
+    imageCreditContainer: {
+      position: 'absolute',
+      bottom: 8,
+      right: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    imageCreditText: {
+      color: 'white',
+      fontSize: 10,
+      fontWeight: '600',
+    },
   }), [colors]);
 
   const textInputProps = {
@@ -220,7 +234,14 @@ export function ExtendedFactSheet({
             {data && (
               <View style={styles.content}>
                 {showImages && data.image_url && (
-                  <Image source={{ uri: data.image_url }} style={styles.image} />
+                  <View>
+                    <Image source={{ uri: data.image_url }} style={styles.image} />
+                    {data.image_credit && (
+                      <View style={styles.imageCreditContainer}>
+                        <Text style={styles.imageCreditText}>Image: {data.image_credit}</Text>
+                      </View>
+                    )}
+                  </View>
                 )}
                 {data.category && (
                   <Text style={styles.categoryText}>
